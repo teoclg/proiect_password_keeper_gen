@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Passwords</title>
+    <style>
+        body {
+            background: linear-gradient(to left, teal, #1E90FF);
+        }
+
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center; /* Center align the content of the table */
+            border-collapse: collapse; /* Collapse table borders */
+            border: 2px solid black; /* Set border width and color for the whole table */
+            background-color: #E0E0E0; 
+        }
+
+        th, td {
+            border: 2px solid black; /* Set border width and color for table cells */
+            padding: 8px; /* Add padding to table cells for better spacing */
+        }
+
+        .center-button {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1><center> Password table </center></h1>
+    <table>
+        <tr>
+            <th>ID Account</th>
+            <th>Site Name</th>
+            <th>Email</th>
+            <th>Account name</th>
+            <th>Password</th>
+        </tr>
+        {% for row in table_data %}
+        <tr>
+            {% for column in row %}
+            <td>{{ column }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <form action="/add_entry">
+        <button class="center-button" type="submit">Add entry</button>
+    </form>
+    <br>
+    <form action="/modify_entry">
+        <button class="center-button" type="submit">Modify entry</button>
+    </form>
+    <br>
+    <form action="/delete_entry">
+        <button class="center-button" type="submit">Delete entry</button>
+    </form>
+    <br>
+    <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
+</body>
+{% extends 'base.html' %}
+</html>

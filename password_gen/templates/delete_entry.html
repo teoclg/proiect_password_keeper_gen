@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Entries</title>
+    <style>
+        body {
+            background: linear-gradient(to left, teal, #1E90FF);
+        }
+
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center; /* Center align the content of the table */
+            border-collapse: collapse; /* Collapse table borders */
+            border: 2px solid black; /* Set border width and color for the whole table */
+            background-color: #E0E0E0; 
+        }
+
+        th, td {
+            border: 2px solid black; /* Set border width and color for table cells */
+            padding: 8px; /* Add padding to table cells for better spacing */
+        }
+
+        .center-button {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1><center>Delete Entries</center></h1>
+    <form action="/delete_entry" method="post">
+        <table>
+            <tr>
+                <th>Select</th>
+                <th>ID</th>
+                <th>Site Name</th>
+                <th>Email</th>
+                <th>Account Name</th>
+                <th>Password</th>
+            </tr>
+            {% for row in table_data %}
+            <tr>
+                <td><input type="checkbox" name="entry_id[]" value="{{ row[0] }}"></td>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" class="center-button" value="Delete Selected">
+        <br>
+        <br>
+        <button type="button" class="center-button" onclick="goToHome()">Home</button>
+    </form>
+	
+	<script>
+        function goToHome() {
+            window.location.href = '/homepage';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate New Password</title>
+    <style>
+        body {
+            background: linear-gradient(to left, teal, #1E90FF);
+        }
+        .center-button {
+            display: block;
+            margin: 0 auto;
+        }
+        .input-group, .submit-button {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .options-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Allows items to wrap onto the next line */
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-right: 20px; /* Space between the columns */
+        }
+        .column:last-child {
+            margin-right: 0; /* Remove margin for the last column */
+        }
+        .column select, .column input, .column label {
+            margin-bottom: 5px; /* Space between inputs */
+        }
+        /* Additional CSS */
+    </style>
+</head>
+<body>
+    <h1> Generate New Password </h1>
+    <form action="/pw_gen" method="POST">
+        <div class="input-box">
+            Password:
+            <textarea class="input-box" name="initial_password" rows="1" placeholder="Insert initial password"></textarea>
+        </div>
+        <br>
+        <div class="checkboxes">
+            <label><input type="checkbox" name="options" value="character_replacement"> Character Replacement</label><br><br>
+            <label><input type="checkbox" name="options" value="reverse"> Reverse</label><br>
+            
+            <div class="options-container">
+                <div class="column" id="shifting-options">
+                    <label><input type="checkbox" name="options" value="shifting"> Shifting</label>
+                    Direction:
+                    <select name="shifting_direction">
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                    Number of Places:
+                    <input type="number" name="number_of_places" min="1" value="1">
+                </div>
+                
+                <div class="column" id="padding-options">
+                    <label><input type="checkbox" name="options" value="padding"> Padding</label>
+                    From:
+                    <select name="padding_direction">
+                        <option value="begin">Beginning</option>
+                        <option value="center">Center</option>
+                        <option value="end">End</option>
+                    </select>
+                    Number of Times:
+                    <input type="number" name="number_of_times" min="1" value="1">
+                    Character for Padding:
+                    <input type="text" name="padding_character" value=" ">
+                </div>
+            </div>
+            
+            <label><input type="checkbox" name="options" value="shuffling"> Random Shuffling</label>
+        </div>
+        <br>
+        <input type="submit" name="generate_action" value="Generate Password Based on Initial Password" class="left-button">
+        <br><br>
+        <input type="submit" name="generate_action" value="Generate Random Password" class="left-button">
+        <br><br>
+        <label>Random Password Length:</label>
+        <input type="number" name="password_length" min="1" value="8">
+    </form>
+    <br>
+    <button class="left-button" onclick="window.location.href = '/homepage';">Home</button>
+</body>
+</html>
