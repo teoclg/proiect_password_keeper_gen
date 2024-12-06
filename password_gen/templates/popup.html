@@ -31,11 +31,23 @@
     .credentials {
       margin-top: 15px;
     }
+    .success-message, .error-message {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .success-message {
+      color: green;
+    }
+    .error-message {
+      color: red;
+    }
   </style>
 </head>
 <body>
   <h3>Password Manager</h3>
   
+  <!-- Existing Fetch Section -->
   <div class="field-container">
     <input type="text" id="site-url" placeholder="Enter website URL" />
     <button id="fetch-credentials">Fetch Credentials</button>
@@ -45,6 +57,27 @@
     <div><strong>Account Name:</strong> <span id="account-name">N/A</span></div>
     <div><strong>Password:</strong> <span id="password">N/A</span></div>
   </div>
+
+  <hr>
+
+  <!-- New Save Section -->
+  <h4>Add New Credentials</h4>
+  <div class="field-container">
+    <input type="text" id="new-site-name" placeholder="Site Name" />
+  </div>
+  <div class="field-container">
+    <input type="email" id="new-email" placeholder="Email" />
+  </div>
+  <div class="field-container">
+    <input type="text" id="new-account-name" placeholder="Account Name" />
+  </div>
+  <div class="field-container">
+    <input type="password" id="new-password" placeholder="Password" />
+  </div>
+  <button id="save-credentials">Save Credentials</button>
+
+  <div class="success-message" id="save-success" style="display: none;">Credentials saved successfully!</div>
+  <div class="error-message" id="save-error" style="display: none;">Failed to save credentials.</div>
 
   <script src="popup.js"></script>
 </body>

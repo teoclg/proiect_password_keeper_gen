@@ -75,7 +75,7 @@
             <select name="id_account" id="id_account">
                 <!-- Populate options dynamically from Flask route -->
                 {% for row in table_data %}
-                    <option value="{{ row[0] }}">ID: {{ row[0] }} Site: {{ row[1]}} Email: {{row[2]}} Account name: {{row[3]}} Password: {{row[4]}}</option>
+                    <option value="{{ row[0] }}">ID: {{ row[0] }} Site: {{ row[1] }} Email: {{ row[2] }} Account name: {{ row[3] }} Password: {{ row[4] }} Details: {{ row[5] }}</option>
                 {% endfor %}
             </select>
             <label for="site_name">Site Name:</label>
@@ -86,6 +86,8 @@
             <input type="text" id="account_name" name="account_name">
             <label for="password">Password:</label>
             <input type="password" id="password" name="password">
+            <label for="text">Details:</label>
+            <input type="text" id="details" name="details">
             <input type="submit" value="Modify Entry">
         </form>
         <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>

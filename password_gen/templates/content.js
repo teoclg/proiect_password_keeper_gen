@@ -15,3 +15,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         fillPassword(message.username, message.password);
     }
 });
+

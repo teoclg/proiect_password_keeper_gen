@@ -20,3 +20,4 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             .catch(error => console.error("Error fetching credentials:", error));
     }
 });
+

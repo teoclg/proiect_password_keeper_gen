@@ -39,6 +39,7 @@
                 <th>Email</th>
                 <th>Account Name</th>
                 <th>Password</th>
+				<th>Details</th>
             </tr>
             {% for row in table_data %}
             <tr>
@@ -47,7 +48,8 @@
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>
                 <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
+				<td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
             </tr>
             {% endfor %}
         </table>

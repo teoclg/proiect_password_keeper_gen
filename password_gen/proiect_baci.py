@@ -10,63 +10,7 @@ from flask import send_file
 from functools import wraps
 import os
 import re
-
-letter_dict = {
-  "a": ["4", "/\-", "@", "^", "A"],
-  "A": ["4", "/\-", "@", "^", "a"],
-  "b": ["I3", "8", "13", "|3", "!3", "(#", "/3", ")3", "|-]", "j3", "B"],
-  "B": ["I3", "8", "13", "|3", "!3", "(#", "/3", ")3", "|-]", "j3", "b"],
-  "c": ["[", "<", "(", "C"],
-  "C": ["[", "<", "(", "c"],
-  "d": [")", "|)", "(|", "I>", "|>", "T)", "I7", "c1", "|}", "|]", "D"],
-  "D": [")", "|)", "(|", "I>", "|>", "T)", "I7", "c1", "|}", "|]", "d"],
-  "e": ["3", "[-", "€", "E"],
-  "E": ["3", "[-", "€", "e"],
-  "f": ["|=", "|", "/=", "F"],
-  "F": ["|=", "|", "/=", "F"],
-  "g": ["6", "&", "(_+", "9", "C-", "(?", "[,", "{,", "<-", "G"],
-  "G": ["6", "&", "(_+", "9", "C-", "(?", "[,", "{,", "<-", "g"],
-  "h": ["#", "/-/", "[-]", "]-[", ")-(", "(-)", ":-:", "|~|", "|-|", "]~[", "}{" , "!-!", "I+I", "H"],
-  "H": ["#", "/-/", "[-]", "]-[", ")-(", "(-)", ":-:", "|~|", "|-|", "]~[", "}{" , "!-!", "I+I", "h"],
-  "i": ["1", "|", "]", "!", "I"],
-  "I": ["1", "|", "]", "!", "i"],
-  "j": [",_|", "_|", "._]", "._|", "J"],
-  "J": [",_|", "_|", "._]", "._|", "j"],
-  "k": [">|", "|<", "1<", "|C", "|{", "K"],
-  "K": [">|", "|<", "1<", "|C", "|{", "K"],
-  "l": ["£", "[_", "|_", "L"],
-  "L": ["£", "[_", "|_", "l"],
-  "m": ["IVI", "[V]", "|\/|", "^^", "<\/>", "{V}", "(V)", "]\/[", "M"],
-  "M": ["IVI", "[V]", "|\/|", "^^", "<\/>", "{V}", "(V)", "]\/[", "m"],
-  "n": ["|\|", "/\/", "[\]", "<\>", "{\}", "/\V", "N"],
-  "N": ["|\|", "/\/", "[\]", "<\>", "{\}", "/\V", "n"],
-  "o": ["0", "()", "<>", "[]", "{}", "O"],
-  "O": ["0", "()", "<>", "[]", "{}", "o"],
-  "p": ["|D", "[]D", "|>", "|^"],
-  "P": ["|D", "[]D", "|>", "|^"],
-  "q": ["(_,)", "()_", "0_", "<)", "9", "()"],
-  "Q": ["(_,)", "()_", "0_", "<)", "9", "()"],
-  "r": ["|2", "9", "|`", "|~", "|?", "/2", "|^", "[z", "|<"],
-  "R": ["|2", "9", "|`", "|~", "|?", "/2", "|^", "[z", "|<"],
-  "s": ["$", "5", "Z",  "z"],
-  "S": ["$", "5", "Z",  "z"],
-  "t": ["7", "+", "-|-", "][", "~|~"],
-  "T": ["7", "+", "-|-", "][", "~|~"],
-  "u": ["(_)", "|_|", "v", "L|"],
-  "U": ["(_)", "|_|", "v", "L|"],
-  "v": ["\/", "|/", "\|"],
-  "V": ["\/", "|/", "\|"],
-  "w": ["\/\/", "vv", "//", "\^/", "\/\/", "(n)", "\V/",
-    "\X/", "\I/", "\_I_/", "\_:_/", "2u"],
-  "W": ["\/\/", "vv", "//", "\^/", "\/\/", "(n)", "\V/",
-    "\X/", "\I/", "\_I_/", "\_:_/", "2u"],
-  "x": [">", "<", "}", "{", ")", "(", "]", "["],
-  "X": [">", "<", "}", "{", ")", "(", "]", "["],
-  "y": ["`/", "\\|/", "\\//"],
-  "Y": ["`/", "\\|/", "\\//"],
-  "z": ["=", "/_", "%", "~/_", "-\\_", "~|"],
-  "Z": ["=", "/_", "%", "~/_", "-\\_", "~|"]
-}
+from flask_cors import CORS
 
 def simple_letter_replacement(x):
     alphabet = list(string.ascii_letters)
@@ -114,22 +58,31 @@ def random_pw(length):
     pw = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase + string.hexdigits + string.punctuation) for _ in range(length))
     return pw
 
-def complex_letter_replacement(x):
-    new_pw = ''
-    for i in x:
-        if((i in letter_dict.keys()) == 1):
-            new_pw = new_pw + random.choice(letter_dict[i])
-        else:
-            new_pw = new_pw + i
-    return new_pw
-
 def check_password_strength(password):
     min_length = 8
     uppercase_regex = re.compile(r'[A-Z]')
     lowercase_regex = re.compile(r'[a-z]')
     digit_regex = re.compile(r'\d')
     special_char_regex = re.compile(r'[!@#$%^&*()_+{}[\]:;<>,.?~\\/-]')
-
+    #update this list
+    most_used_passwords = [
+    "123456", "123456789", "qwerty", "password", "12345", "12345678", "111111", "123123", 
+    "1234567", "1234567890", "1234", "000000", "iloveyou", "123", "qwertyuiop", "abc123", 
+    "password1", "123321", "654321", "superman", "hello123", "987654321", "sunshine", 
+    "1q2w3e4r", "password123", "qwe123", "admin", "letmein", "welcome", "passw0rd", 
+    "freedom", "whatever", "princess", "dragon", "baseball", "football", "monkey", 
+    "shadow", "master", "michael", "ashley", "123qwe", "password!", "qazwsx", "trustno1", 
+    "starwars", "harley", "ninja", "zxcvbnm", "zaq12wsx", "test", "batman", "soccer", 
+    "mustang", "jordan23", "jennifer", "hunter", "buster", "thomas", "love123", "charlie", 
+    "access", "q1w2e3r4", "merlin", "maggie", "hello", "password123!", "cookie", "pepper", 
+    "ginger", "winter", "summer", "apple", "orange", "tigger", "internet", "pokemon", 
+    "matrix", "star", "letmein123", "hello1234", "welcome123", "flower", "peanut", "football1", 
+    "iloveyou1", "secure123", "newyork", "chelsea", "123abc", "buster1", "monkey123", "admin123", 
+    "hunter123", "abc12345", "123456a", "secret", "strong123", "liverpool"]
+    
+    if password in most_used_passwords:
+        return "Weak: Password is too common"
+    
     if len(password) < min_length:
         return "Weak: Password should be at least {} characters long".format(min_length)
 
@@ -141,7 +94,7 @@ def check_password_strength(password):
 
     if not special_char_regex.search(password):
         return "Weak: Password should contain at least one special character"
-
+    
     return "Strong: Password meets the criteria"
 
 def set_connection_cursor():
@@ -171,12 +124,12 @@ def show_table():
     
     return result
 
-def insert_into_table(site_name, email, account_name, password):
+def insert_into_table(site_name, email, account_name, password, details):
     connection,cursor = set_connection_cursor()
     # Define your insert statement
-    insert_query = "INSERT INTO password_management_table (site_name, email, account_name, password) VALUES (%s, %s, %s, %s)"
+    insert_query = "INSERT INTO password_management_table (site_name, email, account_name, password, details) VALUES (%s, %s, %s, %s, %s)"
     # Data to be inserted
-    data_to_insert = (str(site_name), str(email), str(account_name), str(password))  
+    data_to_insert = (str(site_name), str(email), str(account_name), str(password), str(details))  
     # Execute the insert query
     cursor.execute(insert_query, data_to_insert)
     # Commit the transaction
@@ -280,7 +233,7 @@ def get_credentials_by_site_name(site_name):
     connection, cursor = set_connection_cursor()
     
     # Define the SQL query to get the account details by site_name
-    query = "SELECT email, account_name, password FROM password_management_table WHERE site_name = %s"
+    query = "SELECT email, account_name, password, details FROM password_management_table WHERE site_name = %s"
     
     # Execute the query with the provided site name
     cursor.execute(query, (site_name,))
@@ -296,15 +249,15 @@ def get_credentials_by_site_name(site_name):
 
 #end of new functions
     
-def update_table_entry_by_id(id_to_be_updated, site_name, email, account_name, password):
+def update_table_entry_by_id(id_to_be_updated, site_name, email, account_name, password, details):
     
     connection,cursor = set_connection_cursor()
     
     # Define your update statement
-    update_query = "UPDATE password_management_table SET site_name = %s, email = %s, account_name = %s, password = %s WHERE ID_account = %s"
+    update_query = "UPDATE password_management_table SET site_name = %s, email = %s, account_name = %s, password = %s, details = %s WHERE ID_account = %s"
     
     # New values to be updated
-    new_values = (str(site_name), str(email), str(account_name), str(password), int(id_to_be_updated))  
+    new_values = (str(site_name), str(email), str(account_name), str(password), str(details), int(id_to_be_updated))  
     
     # Execute the update query
     cursor.execute(update_query, new_values)
@@ -337,6 +290,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key")
 app.config['SESSION_TYPE'] = 'filesystem'  # Use server-side sessions
 Session(app)
+CORS(app)
 
 def requires_2fa(f):
     @wraps(f)
@@ -470,9 +424,10 @@ def modify_entry():
         email = request.form['email']
         account_name = request.form['account_name']
         password = request.form['password']
+        details = request.form['details']
     
         # Update the entry with the new values
-        update_table_entry_by_id(id_account, site_name, email, account_name, password)
+        update_table_entry_by_id(id_account, site_name, email, account_name, password, details)
         # Redirect to the main page or wherever you want after modification
         return redirect(url_for('homepage'))
     
@@ -506,7 +461,7 @@ def pw_gen():
             generated_password = initial_password
         
         if 'character_replacement' in options:
-            generated_password = complex_letter_replacement(initial_password)
+            generated_password = reverse(initial_password)
 
         if 'reverse' in options:
             generated_password = reverse(initial_password)
@@ -548,6 +503,8 @@ def pw_gen():
 @app.route('/check-password', methods=['GET'])
 def check_password():
     password_input = request.args.get('password', '')
+    if not password_input:
+        return jsonify({"result": "Error: No password provided"}), 400  # Return HTTP 400 if no password
     result = check_password_strength(password_input)
     return jsonify({"result": result})
 
@@ -569,6 +526,32 @@ def get_credentials():
         })
     else:
         return jsonify({"error": "No credentials found"}), 404
+
+@app.route('/save_credentials', methods=['POST'])
+def save_credentials():
+    data = request.json
+    site_name = data.get('site_name')
+    email = data.get('email')
+    account_name = data.get('account_name')
+    password = data.get('password')
+
+    if not site_name or not email or not account_name or not password:
+        return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+    try:
+        connection, cursor = set_connection_cursor()
+        insert_query = """
+            INSERT INTO password_management_table (site_name, email, account_name, password)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (site_name, email, account_name, password))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"success": False, "message": "Database error"}), 500
 
 
 if __name__ == '__main__':
