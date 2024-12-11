@@ -8,87 +8,97 @@
         body {
             background: linear-gradient(to left, teal, #1E90FF);
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center; /* Center-align all text */
         }
         
         .container {
             max-width: 800px;
-            margin: 20px auto; /* Center the container horizontally */
+            margin: 20px auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Center-align all text */
         }
-        
-        form {
-            text-align: left; /* Left-align form elements */
-            margin-top: 20px; /* Add some space between the header and the form */
-        }
-        
-        label, input, select {
-            display: block; /* Display form elements as block elements */
-            margin: 10px auto; /* Add some space around each form element and center them horizontally */
-            text-align: center;
-        }
-        
-        input[type="submit"] {
+
+        form label, form input, form select, form button {
             display: block;
-            margin: 20px auto; /* Add space around the submit button and center it */
-            padding: 10px 20px;
+            margin: 10px auto;
+            width: 90%;
+        }
+
+        form input[type="submit"], .center-button {
             background-color: teal;
             color: #fff;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        input[type="submit"]:hover {
-            background-color: #008080;
-        }
-        
-        .center-button {
-            display: block;
-            margin: 20px auto; /* Add space around the home button and center it */
             padding: 10px 20px;
-            background-color: teal;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        
-        .center-button:hover {
+
+        form input[type="submit"]:hover, .center-button:hover {
             background-color: #008080;
+        }
+
+        select:disabled, input:disabled {
+            background-color: #ccc;
         }
     </style>
+    <script>
+        let originalOptions = []; // Array to store original dropdown options
+
+        function enableFields() {
+            const enteredPassword = prompt("Enter the master password to enable this form:");
+            const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+
+            if (enteredPassword === masterPassword) {
+                // Replace masked options with original options
+                const dropdown = document.getElementById("id_account");
+                dropdown.querySelectorAll("option").forEach((option, index) => {
+                    option.textContent = originalOptions[index];
+                });
+
+                // Enable all form fields
+                dropdown.disabled = false;
+                document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
+                alert("Form unlocked!");
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        window.onload = function () {
+            const dropdown = document.getElementById("id_account");
+            // Store original options and mask them
+            dropdown.querySelectorAll("option").forEach(option => {
+                originalOptions.push(option.textContent);
+                option.textContent = "ACCESSED LOCKED TILL THE PASSWORD IS INPUTTED"; // Mask the options
+            });
+        };
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Modify Entry</h1>
+        <button class="center-button" onclick="enableFields()">Unlock window</button>
         <form action="/modify_entry" method="POST">
             <label for="id_account">Select an account to modify:</label>
-            <select name="id_account" id="id_account">
-                <!-- Populate options dynamically from Flask route -->
+            <select name="id_account" id="id_account" disabled>
                 {% for row in table_data %}
-                    <option value="{{ row[0] }}">ID: {{ row[0] }} Site: {{ row[1] }} Email: {{ row[2] }} Account name: {{ row[3] }} Password: {{ row[4] }} Details: {{ row[5] }}</option>
+                    <option value="{{ row[0] }}">
+                        Site: {{ row[1] }}, Email: {{ row[2] }}, Account name: {{ row[3] }}, Password: {{ row[4] }}, Details: {{ row[5] }}
+                    </option>
                 {% endfor %}
             </select>
             <label for="site_name">Site Name:</label>
-            <input type="text" id="site_name" name="site_name">
+            <input type="text" id="site_name" name="site_name" disabled>
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email">
+            <input type="email" id="email" name="email" disabled>
             <label for="account_name">Account Name:</label>
-            <input type="text" id="account_name" name="account_name">
+            <input type="text" id="account_name" name="account_name" disabled>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password">
-            <label for="text">Details:</label>
-            <input type="text" id="details" name="details">
-            <input type="submit" value="Modify Entry">
+            <input type="password" id="password" name="password" disabled>
+            <label for="details">Details:</label>
+            <input type="text" id="details" name="details" disabled>
+            <input type="submit" value="Modify Entry" disabled>
         </form>
         <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
     </div>

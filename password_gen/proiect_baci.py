@@ -110,12 +110,18 @@ def set_connection_cursor():
     # Return both the connection and cursor objects
     return connection,cursor
 
-def show_table():
+def show_table(ID_master_account):
     # Establish a connection to MySQL
-    connection,cursor = set_connection_cursor()
+    connection, cursor = set_connection_cursor()
     
-    cursor.execute("SELECT * FROM password_management_table")
-
+    # Execute the query with the parameter as a tuple
+    query = """
+    SELECT site_name, email, account_name, password, details
+    FROM password_management_table
+    WHERE ID_master_account = %s
+    """
+    cursor.execute(query, (ID_master_account,))  # Note the comma to make it a tuple
+    
     result = cursor.fetchall()
      
     # Close cursor and connection
@@ -124,12 +130,32 @@ def show_table():
     
     return result
 
-def insert_into_table(site_name, email, account_name, password, details):
+def show_table_for_modify_entry(ID_master_account):
+    # Establish a connection to MySQL
+    connection, cursor = set_connection_cursor()
+    
+    # Execute the query with the parameter as a tuple
+    query = """
+    SELECT ID_account, site_name, email, account_name, password, details
+    FROM password_management_table
+    WHERE ID_master_account = %s
+    """
+    cursor.execute(query, (ID_master_account,))  # Note the comma to make it a tuple
+    
+    result = cursor.fetchall()
+     
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
+    
+    return result
+
+def insert_into_table(site_name, email, account_name, password, details, ID_master_account):
     connection,cursor = set_connection_cursor()
     # Define your insert statement
-    insert_query = "INSERT INTO password_management_table (site_name, email, account_name, password, details) VALUES (%s, %s, %s, %s, %s)"
+    insert_query = "INSERT INTO password_management_table (site_name, email, account_name, password, details, ID_master_account) VALUES (%s, %s, %s, %s, %s, %s)"
     # Data to be inserted
-    data_to_insert = (str(site_name), str(email), str(account_name), str(password), str(details))  
+    data_to_insert = (str(site_name), str(email), str(account_name), str(password), str(details), str(ID_master_account))  
     # Execute the insert query
     cursor.execute(insert_query, data_to_insert)
     # Commit the transaction
@@ -171,9 +197,9 @@ def create_master_account(master_account_name, master_account_password, master_a
 def login_master_account(master_account_name, master_account_password):
     connection, cursor = set_connection_cursor()
     
-    # Define your select statement to retrieve user and their TOTP secret
+    # Define your select statement to retrieve user information
     select_query = """
-        SELECT master_account_name, master_account_password, totp_secret
+        SELECT ID_master_account, master_account_name, master_account_password, totp_secret
         FROM account_table
         WHERE master_account_name = %s AND master_account_password = %s
     """
@@ -181,25 +207,23 @@ def login_master_account(master_account_name, master_account_password):
     
     # Fetch the result
     result = cursor.fetchone()
-    # Close cursor and connection
     cursor.close()
     connection.close()
     
     if result:
-        # Check if 2FA is enabled
-        totp_secret = result[2]
+        ID_master_account, name, password, totp_secret = result
+        session['ID_master_account'] = ID_master_account  # Store the ID in the session
+        session['master_account_name'] = name
+        session['2fa_authenticated'] = False  # Initial state before 2FA
+        session['totp_secret'] = totp_secret
+        
         if totp_secret:
-            # Set session variables and redirect to 2FA verification
-            session['master_account_name'] = master_account_name
-            session['2fa_authenticated'] = False
-            session['totp_secret'] = totp_secret
-            return redirect(url_for('verify_2fa'))
+            return redirect(url_for('verify_2fa'))  # Redirect to 2FA verification
         else:
-            # If no 2FA is set up, log in directly
             session['2fa_authenticated'] = True
             return True  # Login successful without 2FA
     else:
-        return False  # Incorrect login credentials
+        return False  # Incorrect credentials
 
 def modify_master_password(master_account_name, current_password, new_password):
     connection, cursor = set_connection_cursor()
@@ -269,22 +293,24 @@ def update_table_entry_by_id(id_to_be_updated, site_name, email, account_name, p
     cursor.close()
     connection.close()
        
-def delete_table_entry_by_id(id_to_be_deleted):
+def delete_table_entry_by_details(site_name, email, account_name, password, details):
+    connection, cursor = set_connection_cursor()
     
-    connection,cursor = set_connection_cursor()
+    # Define the delete query using multiple fields
+    delete_query = """
+        DELETE FROM password_management_table
+        WHERE site_name = %s AND email = %s AND account_name = %s AND password = %s AND details = %s
+    """
     
-    # Define your delete statement
-    delete_query = "DELETE FROM password_management_table WHERE ID_account = %s"
-    
-    # Execute the delete query
-    cursor.execute(delete_query, (id_to_be_deleted,))
+    # Execute the query with the provided parameters
+    cursor.execute(delete_query, (site_name, email, account_name, password, details))
 
     # Commit the transaction
     connection.commit()
     
-    # Close cursor and connection
+    # Close the cursor and connection
     cursor.close()
-    connection.close() 
+    connection.close()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key")
@@ -391,33 +417,94 @@ def login():
     return render_template('login.html')  # Display the login form for GET requests
 
 @app.route('/homepage')
+@requires_2fa
 def homepage():
-    return render_template('homepage.html')
+    ID_master_account = session.get('ID_master_account')
+    if not ID_master_account:
+        return redirect(url_for('login'))  # Redirect to login if not authenticated
+    
+    # Use the ID for personalized functionality
+    return render_template('homepage.html', user_id=ID_master_account)
 
-@app.route('/view_table')
+@app.route('/logout')
+def logout():
+    session.clear()  # Clear all session data
+    return redirect(url_for('login'))
+
+@app.route('/view_table', methods=['GET'])
+@requires_2fa
 def view_table():
-    data = show_table()
-    return render_template('view_table.html', table_data = data)
+    ID_master_account = session.get('ID_master_account')
+    if not ID_master_account:
+        return redirect(url_for('login'))
+    
+    # Fetch accounts data
+    table_data = show_table(ID_master_account)
+
+    # Fetch the master account password from the database using set_connection_cursor
+    connection, cursor = set_connection_cursor()
+    
+    query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
+    cursor.execute(query, (ID_master_account,))
+    result = cursor.fetchone()
+
+    # Close the cursor and connection
+    cursor.close()
+    connection.close()
+
+    if not result:
+        return "Master account not found", 404
+
+    # Access the password from the tuple (the first and only column)
+    master_account_password = result[0]  # Index 0 since it's a tuple
+
+    # Pass the master password and table data to the template
+    return render_template('view_table.html', table_data=table_data, master_account_password=master_account_password)
+
 
 @app.route('/add_entry', methods=['GET', 'POST'])
 def add_entry():
-    # Return a response for the 'POST' method
+    # Ensure user is logged in
+    ID_master_account = session.get('ID_master_account')
+    if not ID_master_account:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         site_name = request.form['site_name']
         email = request.form['email']
         account_name = request.form['account_name']
         password = request.form['password']
+        details = request.form['details']
         
-        insert_into_table(site_name, email, account_name, password)
+        # Insert the new entry with the associated ID_master_account
+        insert_into_table(site_name, email, account_name, password, details, ID_master_account)
         return redirect(url_for('homepage'))
     
-    # Return a response for the 'GET' method
     return render_template('add_entry.html')
 
 @app.route('/modify_entry', methods=['GET', 'POST'])
 def modify_entry():
-    data = show_table()
-    # Return a response for the 'POST' method
+    ID_master_account = session.get('ID_master_account')
+    if not ID_master_account:
+        return redirect(url_for('login'))
+    
+    # Use the show_table function to fetch accounts
+    data = show_table_for_modify_entry(ID_master_account)
+
+    # Fetch the master password
+    connection, cursor = set_connection_cursor()
+    query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
+    cursor.execute(query, (ID_master_account,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if not result:
+        return "Master account not found", 404
+
+    master_account_password = result[0]  
+
+    # Handle POST request
     if request.method == 'POST':
         id_account = int(request.form['id_account'])
         site_name = request.form['site_name']
@@ -428,26 +515,48 @@ def modify_entry():
     
         # Update the entry with the new values
         update_table_entry_by_id(id_account, site_name, email, account_name, password, details)
-        # Redirect to the main page or wherever you want after modification
         return redirect(url_for('homepage'))
     
     # Return a response for the 'GET' method
-    return render_template('modify_entry.html', table_data = data)
+    return render_template('modify_entry.html', table_data=data, master_account_password=master_account_password)
 
 @app.route('/delete_entry', methods=['GET', 'POST'])
 def delete_entry():
-    data = show_table()
-    # Return a response for the 'POST' method
-    if request.method == 'POST':
-        entry_ids = request.form.getlist('entry_id[]')
-        if not entry_ids:
-            return "No entries selected to delete"
-        for entry_id in entry_ids:
-            delete_table_entry_by_id(entry_id)
-        return redirect(url_for('homepage'))
+    ID_master_account = session.get('ID_master_account')
+    if not ID_master_account:
+        return redirect(url_for('login'))
     
-    # Return a response for the 'GET' method
-    return render_template('delete_entry.html', table_data = data)
+    # Fetch table data for the current master account
+    data = show_table(ID_master_account)
+
+    # Fetch the master password for the account
+    connection, cursor = set_connection_cursor()
+    query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
+    cursor.execute(query, (ID_master_account,))
+    result = cursor.fetchone()
+    connection.close()
+
+    if result:
+        master_account_password = result[0]
+    else:
+        master_account_password = ""
+
+    if request.method == 'POST':
+        # Handle deletion logic as before
+        num_entries = len(data)
+        for i in range(num_entries):
+            if f'delete_{i}' in request.form:
+                site_name = request.form.get(f'site_name_{i}')
+                email = request.form.get(f'email_{i}')
+                account_name = request.form.get(f'account_name_{i}')
+                password = request.form.get(f'password_{i}')
+                details = request.form.get(f'details_{i}')
+                delete_table_entry_by_details(site_name, email, account_name, password, details)
+
+        return redirect(url_for('homepage'))
+
+    # Render the delete page for GET requests
+    return render_template('delete_entry.html', table_data=data, master_account_password=master_account_password)
 
 @app.route('/pw_gen', methods=['GET', 'POST'])
 def pw_gen():

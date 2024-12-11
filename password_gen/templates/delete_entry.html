@@ -10,15 +10,15 @@
         table {
             margin-left: auto;
             margin-right: auto;
-            text-align: center; /* Center align the content of the table */
-            border-collapse: collapse; /* Collapse table borders */
-            border: 2px solid black; /* Set border width and color for the whole table */
-            background-color: #E0E0E0; 
+            text-align: center;
+            border-collapse: collapse;
+            border: 2px solid black;
+            background-color: #E0E0E0;
         }
 
         th, td {
-            border: 2px solid black; /* Set border width and color for table cells */
-            padding: 8px; /* Add padding to table cells for better spacing */
+            border: 2px solid black;
+            padding: 8px;
         }
 
         .center-button {
@@ -27,40 +27,67 @@
         }
     </style>
 </head>
-
 <body>
     <h1><center>Delete Entries</center></h1>
     <form action="/delete_entry" method="post">
         <table>
             <tr>
                 <th>Select</th>
-                <th>ID</th>
                 <th>Site Name</th>
                 <th>Email</th>
                 <th>Account Name</th>
                 <th>Password</th>
-				<th>Details</th>
+                <th>Details</th>
             </tr>
             {% for row in table_data %}
             <tr>
-                <td><input type="checkbox" name="entry_id[]" value="{{ row[0] }}"></td>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-				<td>{{ row[4] }}</td>
-                <td>{{ row[5] }}</td>
+                <td>
+                    <input type="checkbox" name="delete_{{ loop.index0 }}" value="yes" id="delete_{{ loop.index0 }}" disabled>
+                    <button type="button" onclick="unlockCheckbox('{{ loop.index0 }}', '{{ row[3] }}')">Unlock</button>
+                </td>
+                <td>
+                    <input type="hidden" name="site_name_{{ loop.index0 }}" value="{{ row[0] }}">
+                    {{ row[0] }}
+                </td>
+                <td>
+                    <input type="hidden" name="email_{{ loop.index0 }}" value="{{ row[1] }}">
+                    {{ row[1] }}
+                </td>
+                <td>
+                    <input type="hidden" name="account_name_{{ loop.index0 }}" value="{{ row[2] }}">
+                    {{ row[2] }}
+                </td>
+                <td id="password_{{ loop.index0 }}">
+                    <input type="hidden" name="password_{{ loop.index0 }}" value="{{ row[3] }}">
+                    *****
+                </td>
+                <td>
+                    <input type="hidden" name="details_{{ loop.index0 }}" value="{{ row[4] }}">
+                    {{ row[4] }}
+                </td>
             </tr>
             {% endfor %}
         </table>
         <br>
         <input type="submit" class="center-button" value="Delete Selected">
-        <br>
-        <br>
+        <br><br>
         <button type="button" class="center-button" onclick="goToHome()">Home</button>
     </form>
-	
-	<script>
+
+    <script>
+        function unlockCheckbox(index, actualPassword) {
+            const enteredPassword = prompt("Enter the master password for this entry:");
+            const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+
+            if (enteredPassword === masterPassword) {
+                document.getElementById(`delete_${index}`).disabled = false;
+                document.getElementById(`password_${index}`).innerText = actualPassword;
+                alert("Checkbox unlocked! You can select this entry for deletion.");
+            } else {
+                alert("Incorrect password! Unable to unlock this checkbox.");
+            }
+        }
+
         function goToHome() {
             window.location.href = '/homepage';
         }

@@ -10,15 +10,15 @@
         table {
             margin-left: auto;
             margin-right: auto;
-            text-align: center; /* Center align the content of the table */
-            border-collapse: collapse; /* Collapse table borders */
-            border: 2px solid black; /* Set border width and color for the whole table */
+            text-align: center;
+            border-collapse: collapse;
+            border: 2px solid black;
             background-color: #E0E0E0; 
         }
 
         th, td {
-            border: 2px solid black; /* Set border width and color for table cells */
-            padding: 8px; /* Add padding to table cells for better spacing */
+            border: 2px solid black;
+            padding: 8px;
         }
 
         .center-button {
@@ -26,41 +26,71 @@
             margin: 0 auto;
         }
     </style>
+    <script>
+		const MASTER_PASSWORD = "{{ master_account_password }}"; // Passed from backend
+
+		function toggleIndividualPassword(toggleSwitch, passwordCell) {
+			const cell = document.getElementById(passwordCell);
+			const password = cell.dataset.password;
+
+			if (toggleSwitch.checked) {
+				const userInput = prompt("Enter the master password to reveal this password:");
+				if (userInput === MASTER_PASSWORD) {
+					cell.textContent = password;
+				} else {
+					alert("Incorrect master password!");
+					toggleSwitch.checked = false; // Reset the switch if the password is incorrect
+				}
+			} else {
+				cell.textContent = '*****'; // Hide the password
+			}
+		}
+	</script>
 </head>
 
 <body>
-    <h1><center> Password table </center></h1>
+    <h1><center>Password Table</center></h1>
+
     <table>
         <tr>
-            <th>ID Account</th>
             <th>Site Name</th>
             <th>Email</th>
-            <th>Account name</th>
+            <th>Account Name</th>
             <th>Password</th>
-			<th>Details</th>
+            <th>Details</th>
+            <th>Toggle</th>
         </tr>
         {% for row in table_data %}
         <tr>
-            {% for column in row %}
-            <td>{{ column }}</td>
-            {% endfor %}
+            <td>{{ row[0] }}</td> <!-- Site Name -->
+            <td>{{ row[1] }}</td> <!-- Email -->
+            <td>{{ row[2] }}</td> <!-- Account Name -->
+            <td id="password-{{ loop.index }}" class="password-cell" data-password="{{ row[3] }}">*****</td> <!-- Password -->
+            <td>{{ row[4] }}</td> <!-- Details -->
+            <td>
+                <label>
+                    <input type="checkbox" 
+                           onchange="toggleIndividualPassword(this, 'password-{{ loop.index }}')">
+                    Show
+                </label>
+            </td>
         </tr>
         {% endfor %}
     </table>
+
     <br>
     <form action="/add_entry">
-        <button class="center-button" type="submit">Add entry</button>
+        <button class="center-button" type="submit">Add Entry</button>
     </form>
     <br>
     <form action="/modify_entry">
-        <button class="center-button" type="submit">Modify entry</button>
+        <button class="center-button" type="submit">Modify Entry</button>
     </form>
     <br>
     <form action="/delete_entry">
-        <button class="center-button" type="submit">Delete entry</button>
+        <button class="center-button" type="submit">Delete Entry</button>
     </form>
     <br>
     <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
 </body>
-{% extends 'base.html' %}
 </html>
