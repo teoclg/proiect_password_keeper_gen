@@ -12,89 +12,69 @@ import os
 import re
 from flask_cors import CORS
 
-def simple_letter_replacement(x):
-    alphabet = list(string.ascii_letters)
-    new_alphabet = ["4", "!3", "(", "[)", "€", "]=", "6", "#", "!", "_|", "]{", "][_", "IVI", "[/]", "()", "|D", "(),", "|<", "$", "']['", "I_I", "\/", "\/\/", "}{", "`/", "~/_"]
-    new_alphabet.extend(new_alphabet) 
-    new_pw = ''
-    for i in x:
-        if((i in alphabet) == 1):
-            new_pw = new_pw + new_alphabet[alphabet.index(i)]
-        else:
-            new_pw = new_pw + i
-    return new_pw
-  
-def reverse(x):
-    return x[::-1]
- 
-def shuffle_pw(x):
-    l = list(x)
-    random.shuffle(l)
-    result = ''.join(l)
-    result = str(result)
-    return result
+
+def generate_password(length, include_lowercase, include_uppercase, include_numbers, include_special):
+    characters = ""
+    if include_lowercase:
+        characters += string.ascii_lowercase
+    if include_uppercase:
+        characters += string.ascii_uppercase
+    if include_numbers:
+        characters += string.digits
+    if include_special:
+        characters += "!@#$%^&*()-_=+[]{}|;:'\",.<>?/`~"
+
+    if not characters:
+        return "Error: No character types selected."
     
-def shifting(x,direction,times):
-    char_list = list(x)
-    if(direction == 0):
-        rotated_list = char_list[times:] + char_list[:times] #left
-    else:
-        rotated_list = char_list[-times:] + char_list[:-times] #right
-    rotated_string = "".join(rotated_list)
-    return rotated_string
-    
-def padding(x, direction, pad_char, times):
-    if(direction == 0):
-        new = pad_char * times + x #left
-    elif(direction == 1):
-        new = pad_char * times + x #right
-    else:
-        times_left_padding = times // 2
-        times_right_padding = times - times_left_padding
-        new = pad_char * times_left_padding + x + pad_char * times_right_padding #center
-    return new
-    
-def random_pw(length):
-    pw = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase + string.hexdigits + string.punctuation) for _ in range(length))
-    return pw
+    return ''.join(random.choice(characters) for _ in range(length))
 
 def check_password_strength(password):
+    # Define criteria
     min_length = 8
     uppercase_regex = re.compile(r'[A-Z]')
     lowercase_regex = re.compile(r'[a-z]')
     digit_regex = re.compile(r'\d')
     special_char_regex = re.compile(r'[!@#$%^&*()_+{}[\]:;<>,.?~\\/-]')
-    #update this list
-    most_used_passwords = [
-    "123456", "123456789", "qwerty", "password", "12345", "12345678", "111111", "123123", 
-    "1234567", "1234567890", "1234", "000000", "iloveyou", "123", "qwertyuiop", "abc123", 
-    "password1", "123321", "654321", "superman", "hello123", "987654321", "sunshine", 
-    "1q2w3e4r", "password123", "qwe123", "admin", "letmein", "welcome", "passw0rd", 
-    "freedom", "whatever", "princess", "dragon", "baseball", "football", "monkey", 
-    "shadow", "master", "michael", "ashley", "123qwe", "password!", "qazwsx", "trustno1", 
-    "starwars", "harley", "ninja", "zxcvbnm", "zaq12wsx", "test", "batman", "soccer", 
-    "mustang", "jordan23", "jennifer", "hunter", "buster", "thomas", "love123", "charlie", 
-    "access", "q1w2e3r4", "merlin", "maggie", "hello", "password123!", "cookie", "pepper", 
-    "ginger", "winter", "summer", "apple", "orange", "tigger", "internet", "pokemon", 
-    "matrix", "star", "letmein123", "hello1234", "welcome123", "flower", "peanut", "football1", 
-    "iloveyou1", "secure123", "newyork", "chelsea", "123abc", "buster1", "monkey123", "admin123", 
-    "hunter123", "abc12345", "123456a", "secret", "strong123", "liverpool"]
     
+    # List of most used passwords (can be updated regularly)
+    most_used_passwords = [
+        "123456", "123456789", "qwerty", "password", "12345", "12345678", "111111", "123123",
+        "1234567", "1234567890", "1234", "000000", "iloveyou", "123", "qwertyuiop", "abc123",
+        "password1", "123321", "654321", "superman", "hello123", "987654321", "sunshine",
+        "1q2w3e4r", "password123", "qwe123", "admin", "letmein", "welcome", "passw0rd",
+        "freedom", "whatever", "princess", "dragon", "baseball", "football", "monkey",
+        "shadow", "master", "michael", "ashley", "123qwe", "password!", "qazwsx", "trustno1",
+        "starwars", "harley", "ninja", "zxcvbnm", "zaq12wsx", "test", "batman", "soccer",
+        "mustang", "jordan23", "jennifer", "hunter", "buster", "thomas", "love123", "charlie",
+        "access", "q1w2e3r4", "merlin", "maggie", "hello", "password123!", "cookie", "pepper",
+        "ginger", "winter", "summer", "apple", "orange", "tigger", "internet", "pokemon",
+        "matrix", "star", "letmein123", "hello1234", "welcome123", "flower", "peanut", "football1",
+        "iloveyou1", "secure123", "newyork", "chelsea", "123abc", "buster1", "monkey123", "admin123",
+        "hunter123", "abc12345", "123456a", "secret", "strong123", "liverpool"
+    ]
+    
+    # Check if password is in the list of most-used passwords
     if password in most_used_passwords:
         return "Weak: Password is too common"
     
+    # Check minimum length
     if len(password) < min_length:
         return "Weak: Password should be at least {} characters long".format(min_length)
-
+    
+    # Check for uppercase and lowercase letters
     if not uppercase_regex.search(password) or not lowercase_regex.search(password):
         return "Weak: Password should contain at least one uppercase and one lowercase letter"
-
+    
+    # Check for digits
     if not digit_regex.search(password):
         return "Weak: Password should contain at least one digit"
-
+    
+    # Check for special characters
     if not special_char_regex.search(password):
         return "Weak: Password should contain at least one special character"
     
+    # If all criteria are met
     return "Strong: Password meets the criteria"
 
 def set_connection_cursor():
@@ -561,51 +541,14 @@ def delete_entry():
 @app.route('/pw_gen', methods=['GET', 'POST'])
 def pw_gen():
     if request.method == 'POST':
-        initial_password = request.form['initial_password']
-        if not initial_password:
-            initial_password = "0"
-        options = request.form.getlist('options')
+        length = int(request.form.get('length', 8))
+        include_lowercase = 'lowercase' in request.form
+        include_uppercase = 'uppercase' in request.form
+        include_numbers = 'numbers' in request.form
+        include_special = 'special' in request.form
         
-        if not options:
-            generated_password = initial_password
-        
-        if 'character_replacement' in options:
-            generated_password = reverse(initial_password)
-
-        if 'reverse' in options:
-            generated_password = reverse(initial_password)
-
-        if 'shifting' in options:
-            direction = request.form['shifting_direction']
-            num_places = int(request.form['number_of_places'])
-            if direction == 'left':
-                generated_password = shifting(initial_password,0,num_places)   
-            elif direction == 'right':
-                generated_password = shifting(initial_password,1,num_places)   
-
-        if 'padding' in options:
-            direction = request.form['padding_direction']
-            num_times = int(request.form['number_of_times'])
-            padding_character = request.form['padding_character']
-            if direction == 'begin':
-                generated_password = padding(initial_password,0,padding_character,num_times)
-            elif direction == 'end':
-                generated_password = padding(initial_password,1,padding_character,num_times)
-            elif direction == 'center':
-                generated_password = padding(initial_password,2,padding_character,num_times)
-                
-        if 'shuffling' in options:
-            generated_password = shuffle_pw(initial_password)
-        
-        # Check if Generate Password Based on Initial Password button was pressed
-        if 'Generate Password Based on Initial Password' in request.form.getlist('generate_action'):
-            pass
-        # Check if Generate Random Password button was pressed
-        elif 'Generate Random Password' in request.form.getlist('generate_action'):
-            password_length = int(request.form['password_length'])
-            generated_password = random_pw(password_length)
-        
-        return render_template('pw_gen_result.html', generated_password = generated_password)
+        generated_password = generate_password(length, include_lowercase, include_uppercase, include_numbers, include_special)
+        return jsonify({"generated_password": generated_password})
     
     return render_template('pw_gen.html')
 
