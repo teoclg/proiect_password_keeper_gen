@@ -11,7 +11,61 @@ from functools import wraps
 import os
 import re
 from flask_cors import CORS
+import base64
+import os
+from Crypto.Cipher import AES
+from Crypto.Protocol.KDF import PBKDF2
+import bcrypt
 
+def hash_password(password):
+    """
+    Generează un hash bcrypt pentru parola dată.
+    """
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+def verify_password(password, hashed_password):
+    """
+    Verifică dacă parola corespunde hash-ului salvat.
+    """
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+# Configurație pentru criptare
+SALT_LENGTH = 16
+KEY_LENGTH = 32
+ITERATIONS = 100000
+
+def generate_key(master_password, salt):
+    """
+    Generează o cheie derivată folosind PBKDF2.
+    """
+    return PBKDF2(master_password, salt, dkLen=KEY_LENGTH, count=ITERATIONS)
+
+def encrypt_password(master_password, plain_password):
+    """
+    Criptează o parolă utilizând AES-GCM.
+    """
+    salt = os.urandom(SALT_LENGTH)
+    key = generate_key(master_password, salt)
+    cipher = AES.new(key, AES.MODE_GCM)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(plain_password.encode('utf-8'))
+
+    return base64.b64encode(salt + nonce + tag + ciphertext).decode('utf-8')
+
+def decrypt_password(master_password, encrypted_data):
+    """
+    Decriptează o parolă utilizând AES-GCM.
+    """
+    encrypted_data = base64.b64decode(encrypted_data)
+    salt = encrypted_data[:SALT_LENGTH]
+    nonce = encrypted_data[SALT_LENGTH:SALT_LENGTH + 16]
+    tag = encrypted_data[SALT_LENGTH + 16:SALT_LENGTH + 32]
+    ciphertext = encrypted_data[SALT_LENGTH + 32:]
+
+    key = generate_key(master_password, salt)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8')
 
 def generate_password(length, include_lowercase, include_uppercase, include_numbers, include_special):
     characters = ""
@@ -91,24 +145,46 @@ def set_connection_cursor():
     return connection,cursor
 
 def show_table(ID_master_account):
-    # Establish a connection to MySQL
+    # Establish a connection to MySQL                                 
     connection, cursor = set_connection_cursor()
-    
     # Execute the query with the parameter as a tuple
-    query = """
-    SELECT site_name, email, account_name, password, details
-    FROM password_management_table
-    WHERE ID_master_account = %s
-    """
-    cursor.execute(query, (ID_master_account,))  # Note the comma to make it a tuple
+    query = "SELECT site_name, email, account_name, password, details FROM password_management_table WHERE ID_master_account = %s"
+    cursor.execute(query, (ID_master_account,))
+    rows = cursor.fetchall()
     
-    result = cursor.fetchall()
-     
+    if not rows:  # Dacă nu există date
+        return []
+
+    master_account_password = session.get('master_account_password')
+    if not master_account_password:
+        raise ValueError("Parola master nu este disponibilă pentru decriptare.")
+
+    result = []
+    for row in rows:
+        try:
+            decrypted_password = decrypt_password(master_account_password, row[3])
+            result.append((row[0], row[1], row[2], decrypted_password, row[4]))
+        except Exception as e:
+            print(f"Eroare la decriptarea parolei pentru site-ul {row[0]}: {e}")
+            result.append((row[0], row[1], row[2], "EROARE", row[4]))
+
     # Close cursor and connection
     cursor.close()
     connection.close()
-    
     return result
+
+def get_master_password(ID_master_account):
+    connection, cursor = set_connection_cursor()
+    query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
+    cursor.execute(query, (ID_master_account,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if result:
+        return result[0]  # Parola master este în prima coloană
+    else:
+        raise Exception("Parola master nu a fost găsită pentru acest cont.")
 
 def show_table_for_modify_entry(ID_master_account):
     # Establish a connection to MySQL
@@ -131,106 +207,111 @@ def show_table_for_modify_entry(ID_master_account):
     return result
 
 def insert_into_table(site_name, email, account_name, password, details, ID_master_account):
-    connection,cursor = set_connection_cursor()
+    connection, cursor = set_connection_cursor()
+    master_account_password = session.get('master_account_password')
+    if not master_account_password:
+        raise ValueError("Parola master nu este disponibilă pentru criptare.")
+
+    encrypted_password = encrypt_password(master_account_password, password)
     # Define your insert statement
     insert_query = "INSERT INTO password_management_table (site_name, email, account_name, password, details, ID_master_account) VALUES (%s, %s, %s, %s, %s, %s)"
-    # Data to be inserted
-    data_to_insert = (str(site_name), str(email), str(account_name), str(password), str(details), str(ID_master_account))  
-    # Execute the insert query
+    # Data to be inserted                     
+    data_to_insert = (site_name, email, account_name, encrypted_password, details, ID_master_account)
+    # Execute the insert query                          
     cursor.execute(insert_query, data_to_insert)
     # Commit the transaction
     connection.commit()
-    # Close cursor and connection
+    # Close cursor and connection                             
     cursor.close()
     connection.close()
 
 #new functions    
 def create_master_account(master_account_name, master_account_password, master_account_email):
-    # Generate a TOTP secret for the user
+    # Hash parola master
+    hashed_password = hash_password(master_account_password)
+    # Generare secret TOTP pentru 2FA
     totp_secret = pyotp.random_base32()
 
     connection, cursor = set_connection_cursor()
-    # Define your insert statement
+    # Define your insert statement                              
     insert_query = """
         INSERT INTO account_table (master_account_name, master_account_password, master_account_email, totp_secret)
         VALUES (%s, %s, %s, %s)
     """
-    # Data to be inserted
-    data_to_insert = (str(master_account_name), str(master_account_password), str(master_account_email), totp_secret)
-    
-    # Execute the insert query
+    # Data to be inserted                     
+    data_to_insert = (master_account_name, hashed_password, master_account_email, totp_secret)
+    # Execute the insert query                          
     cursor.execute(insert_query, data_to_insert)
-    
-    # Commit the transaction
+    # Commit the transaction                        
     connection.commit()
-    
-    # Close cursor and connection
+    # Close cursor and connection                             
     cursor.close()
     connection.close()
-    
-    # Store the secret in the session for the next step
+    # Store the secret in the session for the next step                                                   
     session['totp_secret'] = totp_secret
-    
-    # Redirect to 2FA setup page to complete 2FA setup
+    # Redirect to 2FA setup page to complete 2FA setup                                                  
     return redirect(url_for('setup_2fa'))
     
 def login_master_account(master_account_name, master_account_password):
     connection, cursor = set_connection_cursor()
-    
-    # Define your select statement to retrieve user information
+
+    # Define your select statement to retrieve user information                                                           
     select_query = """
-        SELECT ID_master_account, master_account_name, master_account_password, totp_secret
+        SELECT ID_master_account, master_account_password, totp_secret
         FROM account_table
-        WHERE master_account_name = %s AND master_account_password = %s
+        WHERE master_account_name = %s
     """
-    cursor.execute(select_query, (str(master_account_name), str(master_account_password)))
+    cursor.execute(select_query, (master_account_name,))
     
-    # Fetch the result
+    # Fetch the result                  
     result = cursor.fetchone()
     cursor.close()
     connection.close()
-    
-    if result:
-        ID_master_account, name, password, totp_secret = result
-        session['ID_master_account'] = ID_master_account  # Store the ID in the session
-        session['master_account_name'] = name
-        session['2fa_authenticated'] = False  # Initial state before 2FA
-        session['totp_secret'] = totp_secret
-        
-        if totp_secret:
-            return redirect(url_for('verify_2fa'))  # Redirect to 2FA verification
-        else:
-            session['2fa_authenticated'] = True
-            return True  # Login successful without 2FA
-    else:
-        return False  # Incorrect credentials
 
-def modify_master_password(master_account_email, current_password, new_password):
+    if result:
+        ID_master_account, hashed_password, totp_secret = result
+
+        # Verifică parola
+        if verify_password(master_account_password, hashed_password):
+            session['ID_master_account'] = ID_master_account
+            session['master_account_name'] = master_account_name
+            session['master_account_password'] = master_account_password  # Salvează parola pentru criptare/decriptare
+            session['2fa_authenticated'] = False
+            session['totp_secret'] = totp_secret
+
+            if totp_secret:
+                return redirect(url_for('verify_2fa'))
+            else:
+                session['2fa_authenticated'] = True
+                return True
+        else:
+            return False  # Parola incorectă
+                                                       
+    else:
+        return False  # Utilizatorul nu a fost găsit
+
+def modify_master_password(master_account_name, current_password, new_password):
     connection, cursor = set_connection_cursor()
-    
-    # Verify current password
-    select_query = "SELECT * FROM account_table WHERE master_account_email = %s AND master_account_password = %s"
-    cursor.execute(select_query, (str(master_account_email), str(current_password)))
-    
-    # Check if account exists with current credentials
-    if cursor.fetchone() is None:
-        # Close cursor and connection before returning
+
+    # Selectează hash-ul actual al parolei
+    select_query = "SELECT master_account_password FROM account_table WHERE master_account_name = %s"
+    cursor.execute(select_query, (master_account_name,))
+    result = cursor.fetchone()
+
+    if result and verify_password(current_password, result[0]):
+        # Hash nou pentru parola
+        new_hashed_password = hash_password(new_password)
+
+        update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_name = %s"
+        cursor.execute(update_query, (new_hashed_password, master_account_name))
+        connection.commit()
         cursor.close()
         connection.close()
-        return False  # Incorrect current password or account does not exist
-
-    # Update password
-    update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_email = %s"
-    cursor.execute(update_query, (str(new_password), str(master_account_email)))
-    
-    # Commit the transaction
-    connection.commit()
-    
-    # Close cursor and connection
-    cursor.close()
-    connection.close()
-    
-    return True  # Password update successful
+        return True  # Actualizare reușită
+    else:
+        cursor.close()
+        connection.close()
+        return False  # Parola actuală este incorectă
 
 def get_credentials_by_site_name(site_name):
     # Use existing set_connection_cursor function to get connection and cursor
@@ -427,7 +508,8 @@ def homepage():
 
 @app.route('/logout')
 def logout():
-    session.clear()  # Clear all session data
+    session.pop('master_account_password', None)  # Elimină parola master
+    session.clear()  # Curăță toate datele sesiunii
     return redirect(url_for('login'))
 
 @app.route('/change_password_master_account', methods=['GET', 'POST'])
@@ -457,13 +539,13 @@ def view_table():
     ID_master_account = session.get('ID_master_account')
     if not ID_master_account:
         return redirect(url_for('login'))
-    
-    # Fetch accounts data
+
+    # Obține datele tabelului
     table_data = show_table(ID_master_account)
 
     # Fetch the master account password from the database using set_connection_cursor
     connection, cursor = set_connection_cursor()
-    
+
     query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
     cursor.execute(query, (ID_master_account,))
     result = cursor.fetchone()
@@ -476,11 +558,11 @@ def view_table():
         return "Master account not found", 404
 
     # Access the password from the tuple (the first and only column)
-    master_account_password = result[0]  # Index 0 since it's a tuple
+    master_account_password = session.get('master_account_password')
 
     # Pass the master password and table data to the template
-    return render_template('view_table.html', table_data=table_data, master_account_password=master_account_password)
-
+    if verify_password(master_account_password, result[0]):
+        return render_template('view_table.html', table_data=table_data, master_account_password=master_account_password)
 
 @app.route('/add_entry', methods=['GET', 'POST'])
 def add_entry():
@@ -557,7 +639,7 @@ def delete_entry():
     connection.close()
 
     if result:
-        master_account_password = result[0]
+        master_account_password = session.get('master_account_password')
     else:
         master_account_password = ""
 
@@ -576,7 +658,8 @@ def delete_entry():
         return redirect(url_for('homepage'))
 
     # Render the delete page for GET requests
-    return render_template('delete_entry.html', table_data=data, master_account_password=master_account_password)
+    if verify_password(master_account_password, result[0]):
+        return render_template('delete_entry.html', table_data=data, master_account_password=master_account_password)
 
 @app.route('/pw_gen', methods=['GET', 'POST'])
 def pw_gen():
