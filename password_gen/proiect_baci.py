@@ -604,7 +604,7 @@ def modify_entry():
     if not result:
         return "Master account not found", 404
 
-    master_account_password = result[0]  
+    master_account_password = session.get('master_account_password')  
 
     # Handle POST request
     if request.method == 'POST':
@@ -620,7 +620,8 @@ def modify_entry():
         return redirect(url_for('homepage'))
     
     # Return a response for the 'GET' method
-    return render_template('modify_entry.html', table_data=data, master_account_password=master_account_password)
+    if verify_password(master_account_password, result[0]):
+        return render_template('modify_entry.html', table_data=data, master_account_password=master_account_password)
 
 @app.route('/delete_entry', methods=['GET', 'POST'])
 def delete_entry():
