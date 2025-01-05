@@ -614,9 +614,9 @@ def modify_entry():
         account_name = request.form['account_name']
         password = request.form['password']
         details = request.form['details']
-    
+        encrypted_password = encrypt_password(master_account_password, password)
         # Update the entry with the new values
-        update_table_entry_by_id(id_account, site_name, email, account_name, password, details)
+        update_table_entry_by_id(id_account, site_name, email, account_name, encrypted_password, details)
         return redirect(url_for('homepage'))
     
     # Return a response for the 'GET' method
