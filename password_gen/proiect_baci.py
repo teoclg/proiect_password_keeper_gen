@@ -205,12 +205,12 @@ def login_master_account(master_account_name, master_account_password):
     else:
         return False  # Incorrect credentials
 
-def modify_master_password(master_account_name, current_password, new_password):
+def modify_master_password(master_account_email, current_password, new_password):
     connection, cursor = set_connection_cursor()
     
     # Verify current password
-    select_query = "SELECT * FROM account_table WHERE master_account_name = %s AND master_account_password = %s"
-    cursor.execute(select_query, (str(master_account_name), str(current_password)))
+    select_query = "SELECT * FROM account_table WHERE master_account_email = %s AND master_account_password = %s"
+    cursor.execute(select_query, (str(master_account_email), str(current_password)))
     
     # Check if account exists with current credentials
     if cursor.fetchone() is None:
@@ -220,8 +220,8 @@ def modify_master_password(master_account_name, current_password, new_password):
         return False  # Incorrect current password or account does not exist
 
     # Update password
-    update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_name = %s"
-    cursor.execute(update_query, (str(new_password), str(master_account_name)))
+    update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_email = %s"
+    cursor.execute(update_query, (str(new_password), str(master_account_email)))
     
     # Commit the transaction
     connection.commit()
@@ -345,6 +345,25 @@ def verify_2fa():
     # Render the OTP input page if request method is GET
     return render_template('verify_2fa.html')
 
+@app.route('/verify_2fa_change_password', methods=['GET', 'POST'])
+def verify_2fa_change_password():
+    # Check if `totp_secret` exists in the session
+    if 'totp_secret' not in session:
+        return "2FA setup is missing. Please set up 2FA first.", 400
+    if request.method == 'POST':
+        otp = request.form.get('otp')
+        totp = pyotp.TOTP(session['totp_secret'])
+        print("Generated OTP:", totp.now())
+        # Verify the OTP entered by the user
+        if totp.verify(otp):
+            session['2fa_authenticated'] = True
+            return redirect(url_for('/'))
+        else:
+            return "Invalid OTP. Please try again."
+
+    # Render the OTP input page if request method is GET
+    return render_template('verify_2fa.html')
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -410,6 +429,27 @@ def homepage():
 def logout():
     session.clear()  # Clear all session data
     return redirect(url_for('login'))
+
+@app.route('/change_password_master_account', methods=['GET', 'POST'])
+def change_password_master_account():
+    if request.method == 'POST':
+        # Get the email, current password, and new password from the form
+        email = request.form['email']
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+
+        # Verify current password (using a function like modify_master_password)
+        password_changed = modify_master_password(email, current_password, new_password)
+        
+        if password_changed:
+            # If password is correct, ask for 2FA
+            session['2fa_authenticated'] = False  # Reset 2FA authentication
+            return redirect(url_for('verify_2fa_change_password'))  # Redirect to 2FA verification
+        else:
+            return render_template('change_password_master_account.html', error_message="Incorrect current password or the account does not exist.")
+
+    # For GET requests, render the change password form
+    return render_template('change_password_master_account.html')
 
 @app.route('/view_table', methods=['GET'])
 @requires_2fa

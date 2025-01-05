@@ -43,37 +43,82 @@
         }
     </style>
     <script>
-        let originalOptions = []; // Array to store original dropdown options
+		let originalOptions = []; // Array to store original dropdown options
 
-        function enableFields() {
-            const enteredPassword = prompt("Enter the master password to enable this form:");
-            const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+		function enableFields() {
+			// Create a dialog box with a password field
+			const dialog = document.createElement('div');
+			dialog.style.position = 'fixed';
+			dialog.style.left = '50%';
+			dialog.style.top = '50%';
+			dialog.style.transform = 'translate(-50%, -50%)';
+			dialog.style.background = '#fff';
+			dialog.style.border = '1px solid #ccc';
+			dialog.style.padding = '20px';
+			dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+			dialog.style.zIndex = '1000';
 
-            if (enteredPassword === masterPassword) {
-                // Replace masked options with original options
-                const dropdown = document.getElementById("id_account");
-                dropdown.querySelectorAll("option").forEach((option, index) => {
-                    option.textContent = originalOptions[index];
-                });
+			const label = document.createElement('label');
+			label.textContent = "Enter the master password to enable this form:";
+			label.style.display = 'block';
+			label.style.marginBottom = '10px';
 
-                // Enable all form fields
-                dropdown.disabled = false;
-                document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
-                alert("Form unlocked!");
-            } else {
-                alert("Incorrect password!");
-            }
-        }
+			const input = document.createElement('input');
+			input.type = 'password';
+			input.style.width = '100%';
+			input.style.marginBottom = '10px';
 
-        window.onload = function () {
-            const dropdown = document.getElementById("id_account");
-            // Store original options and mask them
-            dropdown.querySelectorAll("option").forEach(option => {
-                originalOptions.push(option.textContent);
-                option.textContent = "ACCESSED LOCKED TILL THE PASSWORD IS INPUTTED"; // Mask the options
-            });
-        };
-    </script>
+			const submitBtn = document.createElement('button');
+			submitBtn.textContent = "Submit";
+			submitBtn.style.marginRight = '10px';
+
+			const cancelBtn = document.createElement('button');
+			cancelBtn.textContent = "Cancel";
+
+			// Add event listeners
+			submitBtn.addEventListener('click', () => {
+				const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+				if (input.value === masterPassword) {
+					// Replace masked options with original options
+					const dropdown = document.getElementById("id_account");
+					dropdown.querySelectorAll("option").forEach((option, index) => {
+						option.textContent = originalOptions[index];
+					});
+
+					// Enable all form fields
+					dropdown.disabled = false;
+					document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
+					alert("Form unlocked!");
+					document.body.removeChild(dialog);
+				} else {
+					alert("Incorrect password!");
+					input.value = ''; // Clear the password field
+				}
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				document.body.removeChild(dialog);
+			});
+
+			// Append elements to the dialog
+			dialog.appendChild(label);
+			dialog.appendChild(input);
+			dialog.appendChild(submitBtn);
+			dialog.appendChild(cancelBtn);
+
+			// Append dialog to the body
+			document.body.appendChild(dialog);
+		}
+
+		window.onload = function () {
+			const dropdown = document.getElementById("id_account");
+			// Store original options and mask them
+			dropdown.querySelectorAll("option").forEach(option => {
+				originalOptions.push(option.textContent);
+				option.textContent = "ACCESSED LOCKED TILL THE PASSWORD IS INPUTTED"; // Mask the options
+			});
+		};
+	</script>
 </head>
 <body>
     <div class="container">

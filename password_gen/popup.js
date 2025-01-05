@@ -1,4 +1,3 @@
-// Fetch existing credentials
 document.getElementById('fetch-credentials').addEventListener('click', function () {
   const siteUrl = document.getElementById('site-url').value.trim();
 
@@ -6,11 +5,23 @@ document.getElementById('fetch-credentials').addEventListener('click', function 
     fetch(`http://localhost:5000/get_credentials?domain=${siteUrl}`)
       .then(response => response.json())
       .then(data => {
+        const credentialsContainer = document.getElementById('credentials-container');
+        credentialsContainer.innerHTML = ''; // Clear existing content
+
         if (data.error) {
           alert('No credentials found for this site.');
         } else {
-          document.getElementById('account-name').textContent = data.account_name || 'N/A';
-          document.getElementById('password').textContent = data.password || 'N/A';
+          data.forEach(cred => {
+            const credentialDiv = document.createElement('div');
+            credentialDiv.classList.add('credential-item');
+            credentialDiv.innerHTML = `
+              <div><strong>Account Name:</strong> ${cred.account_name || 'N/A'}</div>
+              <div><strong>Email:</strong> ${cred.email || 'N/A'}</div>
+              <div><strong>Password:</strong> ${cred.password || 'N/A'}</div>
+              <hr>
+            `;
+            credentialsContainer.appendChild(credentialDiv);
+          });
         }
       })
       .catch(error => {
@@ -21,6 +32,7 @@ document.getElementById('fetch-credentials').addEventListener('click', function 
     alert('Please enter a valid site URL.');
   }
 });
+
 
 // Save new credentials
 document.getElementById('save-credentials').addEventListener('click', function () {

@@ -11,6 +11,7 @@ document.getElementById('fetch-credentials').addEventListener('click', function 
         } else {
           document.getElementById('account-name').textContent = data.account_name || 'N/A';
           document.getElementById('password').textContent = data.password || 'N/A';
+		  document.getElementById('email').textContent = data.email || 'N/A';
         }
       })
       .catch(error => {

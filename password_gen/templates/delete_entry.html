@@ -75,22 +75,68 @@
     </form>
 
     <script>
-        function unlockCheckbox(index, actualPassword) {
-            const enteredPassword = prompt("Enter the master password for this entry:");
-            const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+		function unlockCheckbox(index, actualPassword) {
+			// Create a dialog box with a password field
+			const dialog = document.createElement('div');
+			dialog.style.position = 'fixed';
+			dialog.style.left = '50%';
+			dialog.style.top = '50%';
+			dialog.style.transform = 'translate(-50%, -50%)';
+			dialog.style.background = '#fff';
+			dialog.style.border = '1px solid #ccc';
+			dialog.style.padding = '20px';
+			dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+			dialog.style.zIndex = '1000';
 
-            if (enteredPassword === masterPassword) {
-                document.getElementById(`delete_${index}`).disabled = false;
-                document.getElementById(`password_${index}`).innerText = actualPassword;
-                alert("Checkbox unlocked! You can select this entry for deletion.");
-            } else {
-                alert("Incorrect password! Unable to unlock this checkbox.");
-            }
-        }
+			const label = document.createElement('label');
+			label.textContent = "Enter the master password for this entry:";
+			label.style.display = 'block';
+			label.style.marginBottom = '10px';
 
-        function goToHome() {
-            window.location.href = '/homepage';
-        }
-    </script>
+			const input = document.createElement('input');
+			input.type = 'password';
+			input.style.width = '100%';
+			input.style.marginBottom = '10px';
+
+			const submitBtn = document.createElement('button');
+			submitBtn.textContent = "Submit";
+			submitBtn.style.marginRight = '10px';
+
+			const cancelBtn = document.createElement('button');
+			cancelBtn.textContent = "Cancel";
+
+			// Add event listeners
+			submitBtn.addEventListener('click', () => {
+				const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+				if (input.value === masterPassword) {
+					document.getElementById(`delete_${index}`).disabled = false;
+					document.getElementById(`password_${index}`).innerText = actualPassword;
+					alert("Checkbox unlocked! You can select this entry for deletion.");
+					document.body.removeChild(dialog);
+				} else {
+					alert("Incorrect password! Unable to unlock this checkbox.");
+					input.value = ''; // Clear the password field
+				}
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				document.body.removeChild(dialog);
+			});
+
+			// Append elements to the dialog
+			dialog.appendChild(label);
+			dialog.appendChild(input);
+			dialog.appendChild(submitBtn);
+			dialog.appendChild(cancelBtn);
+
+			// Append dialog to the body
+			document.body.appendChild(dialog);
+		}
+
+		function goToHome() {
+			window.location.href = '/homepage';
+		}
+</script>
+
 </body>
 </html>

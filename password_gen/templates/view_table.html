@@ -27,25 +27,72 @@
         }
     </style>
     <script>
-		const MASTER_PASSWORD = "{{ master_account_password }}"; // Passed from backend
+    const MASTER_PASSWORD = "{{ master_account_password }}"; // Passed from backend
 
-		function toggleIndividualPassword(toggleSwitch, passwordCell) {
-			const cell = document.getElementById(passwordCell);
-			const password = cell.dataset.password;
+    function toggleIndividualPassword(toggleSwitch, passwordCell) {
+        const cell = document.getElementById(passwordCell);
+        const password = cell.dataset.password;
 
-			if (toggleSwitch.checked) {
-				const userInput = prompt("Enter the master password to reveal this password:");
-				if (userInput === MASTER_PASSWORD) {
-					cell.textContent = password;
-				} else {
-					alert("Incorrect master password!");
-					toggleSwitch.checked = false; // Reset the switch if the password is incorrect
-				}
-			} else {
-				cell.textContent = '*****'; // Hide the password
-			}
-		}
-	</script>
+        if (toggleSwitch.checked) {
+            // Create a dialog box with a password field
+            const dialog = document.createElement('div');
+            dialog.style.position = 'fixed';
+            dialog.style.left = '50%';
+            dialog.style.top = '50%';
+            dialog.style.transform = 'translate(-50%, -50%)';
+            dialog.style.background = '#fff';
+            dialog.style.border = '1px solid #ccc';
+            dialog.style.padding = '20px';
+            dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            dialog.style.zIndex = '1000';
+
+            const label = document.createElement('label');
+            label.textContent = "Enter the master password:";
+            label.style.display = 'block';
+            label.style.marginBottom = '10px';
+
+            const input = document.createElement('input');
+            input.type = 'password';
+            input.style.width = '100%';
+            input.style.marginBottom = '10px';
+
+            const submitBtn = document.createElement('button');
+            submitBtn.textContent = 'Submit';
+            submitBtn.style.marginRight = '10px';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+
+            // Append elements to the dialog
+            dialog.appendChild(label);
+            dialog.appendChild(input);
+            dialog.appendChild(submitBtn);
+            dialog.appendChild(cancelBtn);
+            document.body.appendChild(dialog);
+
+            // Focus on the password input field
+            input.focus();
+
+            submitBtn.onclick = function () {
+                if (input.value === MASTER_PASSWORD) {
+                    cell.textContent = password;
+                } else {
+                    alert("Incorrect master password!");
+                    toggleSwitch.checked = false; // Reset the switch if the password is incorrect
+                }
+                document.body.removeChild(dialog);
+            };
+
+            cancelBtn.onclick = function () {
+                toggleSwitch.checked = false;
+                document.body.removeChild(dialog);
+            };
+        } else {
+            cell.textContent = '*****'; // Hide the password
+        }
+    }
+</script>
+
 </head>
 
 <body>
