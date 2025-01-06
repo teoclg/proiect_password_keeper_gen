@@ -12,9 +12,8 @@ import os
 import re
 from flask_cors import CORS
 import base64
-import os
-from Crypto.Cipher import AES
-from Crypto.Protocol.KDF import PBKDF2
+from Cryptodome.Cipher import AES
+from Cryptodome.Protocol.KDF import PBKDF2
 import bcrypt
 
 def hash_password(password):
@@ -227,30 +226,44 @@ def insert_into_table(site_name, email, account_name, password, details, ID_mast
 
 #new functions    
 def create_master_account(master_account_name, master_account_password, master_account_email):
-    # Hash parola master
+    # Hash password
     hashed_password = hash_password(master_account_password)
-    # Generare secret TOTP pentru 2FA
+    # Generate TOTP secret for 2FA
     totp_secret = pyotp.random_base32()
 
     connection, cursor = set_connection_cursor()
-    # Define your insert statement                              
+
+    # Check if the account name or email already exists
+    check_query = """
+        SELECT COUNT(*)
+        FROM account_table
+        WHERE master_account_name = %s OR master_account_email = %s
+    """
+    cursor.execute(check_query, (master_account_name, master_account_email))
+    existing_count = cursor.fetchone()[0]
+
+    if existing_count > 0:
+        # Account name or email already exists
+        cursor.close()
+        connection.close()
+        return False  # Indicate account creation failure
+
+    # Proceed with account creation if no duplicates found
     insert_query = """
         INSERT INTO account_table (master_account_name, master_account_password, master_account_email, totp_secret)
         VALUES (%s, %s, %s, %s)
     """
-    # Data to be inserted                     
     data_to_insert = (master_account_name, hashed_password, master_account_email, totp_secret)
-    # Execute the insert query                          
     cursor.execute(insert_query, data_to_insert)
-    # Commit the transaction                        
     connection.commit()
-    # Close cursor and connection                             
+
     cursor.close()
     connection.close()
-    # Store the secret in the session for the next step                                                   
+
+    # Store the secret in the session for the next step
     session['totp_secret'] = totp_secret
-    # Redirect to 2FA setup page to complete 2FA setup                                                  
-    return redirect(url_for('setup_2fa'))
+
+    return True  # Indicate successful account creation
     
 def login_master_account(master_account_name, master_account_password):
     connection, cursor = set_connection_cursor()
@@ -354,17 +367,17 @@ def update_table_entry_by_id(id_to_be_updated, site_name, email, account_name, p
     cursor.close()
     connection.close()
        
-def delete_table_entry_by_details(site_name, email, account_name, password, details):
+def delete_table_entry_by_details(site_name, email, account_name, details):
     connection, cursor = set_connection_cursor()
     
     # Define the delete query using multiple fields
     delete_query = """
         DELETE FROM password_management_table
-        WHERE site_name = %s AND email = %s AND account_name = %s AND password = %s AND details = %s
+        WHERE site_name = %s AND email = %s AND account_name = %s AND details = %s
     """
     
     # Execute the query with the provided parameters
-    cursor.execute(delete_query, (site_name, email, account_name, password, details))
+    cursor.execute(delete_query, (site_name, email, account_name, details))
 
     # Commit the transaction
     connection.commit()
@@ -470,7 +483,7 @@ def sign_up_master_account():
             # Redirect to show the QR code for 2FA setup
             return redirect(url_for('index'))
         else:
-            return "Account creation failed. Please try again."
+            return "Account creation failed. The username or email is already in use."
 
     # For GET requests, render the create account form
     return render_template('create_master_account.html')
@@ -652,9 +665,8 @@ def delete_entry():
                 site_name = request.form.get(f'site_name_{i}')
                 email = request.form.get(f'email_{i}')
                 account_name = request.form.get(f'account_name_{i}')
-                password = request.form.get(f'password_{i}')
                 details = request.form.get(f'details_{i}')
-                delete_table_entry_by_details(site_name, email, account_name, password, details)
+                delete_table_entry_by_details(site_name, email, account_name, details)
 
         return redirect(url_for('homepage'))
 
