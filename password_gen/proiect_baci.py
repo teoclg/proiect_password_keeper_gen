@@ -303,20 +303,20 @@ def login_master_account(master_account_name, master_account_password):
     else:
         return False  # Utilizatorul nu a fost găsit
 
-def modify_master_password(master_account_name, current_password, new_password):
+def modify_master_password(master_account_email, current_password, new_password):
     connection, cursor = set_connection_cursor()
 
     # Selectează hash-ul actual al parolei
-    select_query = "SELECT master_account_password FROM account_table WHERE master_account_name = %s"
-    cursor.execute(select_query, (master_account_name,))
+    select_query = "SELECT master_account_password FROM account_table WHERE master_account_email = %s"
+    cursor.execute(select_query, (master_account_email,))
     result = cursor.fetchone()
 
     if result and verify_password(current_password, result[0]):
         # Hash nou pentru parola
         new_hashed_password = hash_password(new_password)
 
-        update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_name = %s"
-        cursor.execute(update_query, (new_hashed_password, master_account_name))
+        update_query = "UPDATE account_table SET master_account_password = %s WHERE master_account_email = %s"
+        cursor.execute(update_query, (new_hashed_password, master_account_email))
         connection.commit()
         cursor.close()
         connection.close()
@@ -451,7 +451,7 @@ def verify_2fa_change_password():
         # Verify the OTP entered by the user
         if totp.verify(otp):
             session['2fa_authenticated'] = True
-            return redirect(url_for('/'))
+            return redirect(url_for('index'))
         else:
             return "Invalid OTP. Please try again."
 
