@@ -189,6 +189,8 @@ def show_table_for_modify_entry(ID_master_account):
     # Establish a connection to MySQL
     connection, cursor = set_connection_cursor()
     
+    master_account_password = session.get('master_account_password')
+    
     # Execute the query with the parameter as a tuple
     query = """
     SELECT ID_account, site_name, email, account_name, password, details
@@ -197,8 +199,17 @@ def show_table_for_modify_entry(ID_master_account):
     """
     cursor.execute(query, (ID_master_account,))  # Note the comma to make it a tuple
     
-    result = cursor.fetchall()
-     
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        try:
+            decrypted_password = decrypt_password(master_account_password, row[4])
+            print(decrypted_password)
+            result.append((row[1], row[2], row[3], decrypted_password, row[5]))
+        except Exception as e:
+            print(f"Eroare la decriptarea parolei pentru site-ul {row[0]}: {e}")
+            result.append((row[1], row[2], row[3], "EROARE", row[5]))
+
     # Close cursor and connection
     cursor.close()
     connection.close()
@@ -326,15 +337,30 @@ def modify_master_password(master_account_email, current_password, new_password)
         connection.close()
         return False  # Parola actuală este incorectă
 
+def normalize_site_name(site_name):
+    # Remove common prefixes and suffixes
+    site_name = site_name.lower()  # Convert to lowercase
+    site_name = site_name.replace('https://', '').replace('http://', '').replace('www.', '')
+    # Strip common suffixes like `.com`, `.net`, etc., if necessary
+    site_name = site_name.split('/')[0]  # Remove anything after a `/`
+    return site_name
+
 def get_credentials_by_site_name(site_name):
     # Use existing set_connection_cursor function to get connection and cursor
     connection, cursor = set_connection_cursor()
     
-    # Define the SQL query to get the account details by site_name
-    query = "SELECT email, account_name, password, details FROM password_management_table WHERE site_name = %s"
+    # Normalize the site_name to handle prefixes/suffixes
+    normalized_site_name = normalize_site_name(site_name)
     
-    # Execute the query with the provided site name
-    cursor.execute(query, (site_name,))
+    # Define the SQL query to get the account details by normalized site_name
+    query = """
+        SELECT email, account_name, password, details 
+        FROM password_management_table 
+        WHERE site_name LIKE %s
+    """
+    
+    # Execute the query with a flexible pattern match
+    cursor.execute(query, (f"%{normalized_site_name}%",))
     
     # Fetch the first matching result, if any
     credentials = cursor.fetchone()
@@ -703,6 +729,15 @@ def get_credentials():
     
     # Fetch credentials from the database based on the site name
     credentials = get_credentials_by_site_name(domain)
+    
+    #master_account_password = session.get('master_account_password')
+    #print(credentials, master_account_password)
+    #try:
+        #decrypted_password = decrypt_password(master_account_password, credentials[2])
+        #print(decrypted_password)
+    #except Exception as e:
+        #print("NAH", e)
+        #decrypted_password = "N/A"
     
     # If credentials exist, return them in JSON format
     if credentials:
