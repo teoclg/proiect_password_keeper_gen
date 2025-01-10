@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Entry</title>
+    <style>
+        body {
+            background: linear-gradient(to left, teal, #1E90FF);
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form label, form input, form select, form button {
+            display: block;
+            margin: 10px auto;
+            width: 90%;
+        }
+
+        form input[type="submit"], .center-button {
+            background-color: teal;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        form input[type="submit"]:hover, .center-button:hover {
+            background-color: #008080;
+        }
+
+        select:disabled, input:disabled {
+            background-color: #ccc;
+        }
+    </style>
+    <script>
+		let originalOptions = []; // Array to store original dropdown options
+
+		function enableFields() {
+			// Create a dialog box with a password field
+			const dialog = document.createElement('div');
+			dialog.style.position = 'fixed';
+			dialog.style.left = '50%';
+			dialog.style.top = '50%';
+			dialog.style.transform = 'translate(-50%, -50%)';
+			dialog.style.background = '#fff';
+			dialog.style.border = '1px solid #ccc';
+			dialog.style.padding = '20px';
+			dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+			dialog.style.zIndex = '1000';
+
+			const label = document.createElement('label');
+			label.textContent = "Enter the master password to enable this form:";
+			label.style.display = 'block';
+			label.style.marginBottom = '10px';
+
+			const input = document.createElement('input');
+			input.type = 'password';
+			input.style.width = '100%';
+			input.style.marginBottom = '10px';
+
+			const submitBtn = document.createElement('button');
+			submitBtn.textContent = "Submit";
+			submitBtn.style.marginRight = '10px';
+
+			const cancelBtn = document.createElement('button');
+			cancelBtn.textContent = "Cancel";
+
+			// Add event listeners
+			submitBtn.addEventListener('click', () => {
+				const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
+				if (input.value === masterPassword) {
+					// Replace masked options with original options
+					const dropdown = document.getElementById("id_account");
+					dropdown.querySelectorAll("option").forEach((option, index) => {
+						option.textContent = originalOptions[index];
+					});
+
+					// Enable all form fields
+					dropdown.disabled = false;
+					document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
+					alert("Form unlocked!");
+					document.body.removeChild(dialog);
+				} else {
+					alert("Incorrect password!");
+					input.value = ''; // Clear the password field
+				}
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				document.body.removeChild(dialog);
+			});
+
+			// Append elements to the dialog
+			dialog.appendChild(label);
+			dialog.appendChild(input);
+			dialog.appendChild(submitBtn);
+			dialog.appendChild(cancelBtn);
+
+			// Append dialog to the body
+			document.body.appendChild(dialog);
+		}
+
+		window.onload = function () {
+			const dropdown = document.getElementById("id_account");
+			// Store original options and mask them
+			dropdown.querySelectorAll("option").forEach(option => {
+				originalOptions.push(option.textContent);
+				option.textContent = "ACCESSED LOCKED TILL THE PASSWORD IS INPUTTED"; // Mask the options
+			});
+		};
+	</script>
+</head>
+<body>
+    <div class="container">
+        <h1>Modify Entry</h1>
+        <button class="center-button" onclick="enableFields()">Unlock window</button>
+        <form action="/modify_entry" method="POST">
+            <label for="id_account">Select an account to modify:</label>
+            <select name="id_account" id="id_account" disabled>
+                {% for row in table_data %}
+                    <option value="{{ row[0] }}">
+                        Site: {{ row[1] }}, Email: {{ row[2] }}, Account name: {{ row[3] }}, Password: {{ row[4] }}, Details: {{ row[5] }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="site_name">Site Name:</label>
+            <input type="text" id="site_name" name="site_name" disabled>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" disabled>
+            <label for="account_name">Account Name:</label>
+            <input type="text" id="account_name" name="account_name" disabled>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" disabled>
+            <label for="details">Details:</label>
+            <input type="text" id="details" name="details" disabled>
+            <input type="submit" value="Modify Entry" disabled>
+        </form>
+        <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Account Dashboard</title>
+    <style>
+        /* Simple styling for the modal pop-up */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            float: right;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Master Account Dashboard</h1>
+
+    <p>
+        <a href="/sign_up_master_account">Sign up Master Account</a>
+    </p>
+    
+    <p>
+        <a href="/login">Log in to Master Account</a>
+    </p>
+    
+    <p>
+        <a href="/change_password_master_account">Change Password for Master Account</a>
+    </p>
+	
+	<p>
+        <a href="/reset_password_master_account">Forgot your password? Click here to reset it.</a>
+    </p>
+    
+    <!-- GDPR Button -->
+    <p>
+        <button id="gdprButton">View GDPR Policy</button>
+    </p>
+
+    <!-- Modal Pop-Up -->
+    <div id="gdprModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>GDPR Privacy Policy</h2>
+            <p><strong>Effective Date:</strong> 10.01.2025</p>
+            <p>
+                We are committed to protecting your data in compliance with the General Data Protection Regulation (GDPR).
+                This policy outlines how we collect, use, and safeguard your information.
+            </p>
+            <h3>1. What We Collect</h3>
+            <ul>
+                <li><strong>Account Info:</strong> Name, email, and credentials.</li>
+                <li><strong>Encrypted Vault Data:</strong> Passwords and sensitive information (accessible only to you).</li>
+                <li><strong>Usage Data:</strong> Logins, IP addresses, and device details.</li>
+            </ul>
+            <h3>2. Why We Collect It</h3>
+            <ul>
+                <li>To provide and secure our services.</li>
+                <li>To comply with legal requirements.</li>
+                <li>To improve service functionality (using anonymized data where possible).</li>
+            </ul>
+            <h3>3. Your Rights</h3>
+            <p>
+                You have the right to access, correct, delete, restrict, or transfer your data. Contact us at 
+                <strong>password_keeper@gmail.com</strong> to exercise these rights.
+            </p>
+            <h3>4. Data Security and Retention</h3>
+            <ul>
+                <li>All vault data is encrypted with a key only you know.</li>
+                <li>Data is stored securely and retained only as long as necessary for our services or legal compliance.</li>
+            </ul>
+            <h3>5. Data Sharing</h3>
+            <p>
+                We do not sell your data. It may be shared with trusted providers or authorities only when required by law.
+            </p>
+            <h3>6. Complaints</h3>
+            <p>
+                For concerns, contact us or file a complaint with your local Data Protection Authority.
+            </p>
+            <p>By using Password Keeper, you agree to this policy.</p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle the modal
+        const gdprButton = document.getElementById('gdprButton');
+        const gdprModal = document.getElementById('gdprModal');
+        const closeModal = document.getElementById('closeModal');
+
+        gdprButton.addEventListener('click', () => {
+            gdprModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            gdprModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === gdprModal) {
+                gdprModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
