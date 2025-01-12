@@ -4,46 +4,173 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Set Up Master Account with 2FA</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 10px 20px; 
+            overflow: hidden;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .right-container {
+            width: 1000px;
+        }
+
+        .container-wrapper {
+            display: flex;
+            justify-content: space-between;
+            width: 1100px;
+            gap: 60px;
+            align-items: flex-start;
+            margin-top: 10px; 
+        }
+
+        h1, h2 {
+            font-size: 1.7em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 1em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            font-size: 0.9em;
+            padding: 8px;
+            width: 90%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 90%;
+            padding: 12px;
+            background: #007edc;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0062aa;
+        }
+
+        ol {
+            color: #333;
+            text-align: left;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .left-container {
+            margin-bottom: 20px;
+        }
+
+        table {
+            margin-top: 20px; 
+            width: 100%; 
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h1>Set Up Your Master Account</h1>
+    <div class="container-wrapper">
+        <div class="container left-container">
+            <h1>Set Up Your Master Account</h1>
+            <p>Complete the form below to create your Master Account.</p>
 
-    <!-- Account Creation Form -->
-    <form action="/sign_up_master_account" method="POST">
-        <label for="master_account_name">Master Account Name:</label>
-        <input type="text" id="master_account_name" name="master_account_name" required><br><br>
-        
-        <label for="master_account_password">Password:</label>
-        <input type="password" id="master_account_password" name="master_account_password" required><br><br>
+            <!-- Account Creation Form -->
+            <form action="/sign_up_master_account" method="POST" style="text-align: left;">
+               <div class="form-row">
+                    <label for="master_account_name">Master Account Name:</label>
+                    <input type="text" id="master_account_name" name="master_account_name" required>
+               </div>
+               <div class="form-row">
+                    <label for="master_account_password">Password:</label>
+                    <input type="password" id="master_account_password" name="master_account_password" required>
+               </div>
+               <div class="form-row">
+                    <label for="master_account_email">Email Address:</label>
+                    <input type="email" id="master_account_email" name="master_account_email" required>
+               </div>
+               <button type="submit">Create Account</button>
+            </form>
+        </div>
 
-        <label for="master_account_email">Email Address:</label>
-        <input type="email" id="master_account_email" name="master_account_email" required><br><br>
+        <div class="container right-container">
+            <h2>Set Up Two-Factor Authentication (2FA)</h2>
+            <p>To secure your account, enable 2FA by scanning the QR code below with an authenticator app like <a href="https://freeotp.github.io" target="_blank">FreeOTP</a>. Follow these steps:</p>
+            <ol>
+                <li>Download and install the <strong>FreeOTP Authenticator</strong> app from your device's app store.</li>
+                <li>Open the FreeOTP app and tap the "+" icon to add a new account.</li>
+                <li>Scan the QR code below to link your account to the app.</li>
+            </ol>
+            <img src="{{ url_for('setup_2fa') }}" alt="2FA QR Code" style="width: 400px; height: 400px; object-fit: contain;"><br>
 
-        <button type="submit">Create Account</button>
-    </form>
+            <p>Once scanned, you’ll need to enter a 6-digit code from your authenticator app each time you log in.</p>
 
-    <!-- 2FA Setup Section (QR Code) -->
-    <h2>Set Up Two-Factor Authentication (2FA)</h2>
-    <p>Before creating your account, scan the QR code below with your authenticator app to enable 2FA.</p>
-    
-	 <!-- 2FA Setup Section (QR Code) -->
-    <h2>Set Up Two-Factor Authentication (2FA)</h2>
-    <p>To secure your account, enable 2FA by scanning the QR code below with an authenticator app like <a href="https://freeotp.github.io" target="_blank">FreeOTP</a>.</p>
-    <p>Follow these steps:</p>
-    <ol>
-        <li>Download and install the <strong>FreeOTP Authenticator</strong> app from your device's app store.</li>
-        <li>Open the FreeOTP app and tap the "+" icon to add a new account.</li>
-        <li>Scan the QR code below to link your account to the app.</li>
-    </ol>
-	
-    <!-- QR code image, dynamically generated by the backend and displayed here -->
-    <img src="{{ url_for('setup_2fa') }}" alt="2FA QR Code"><br><br>
-
-    <p>Once scanned, you’ll need to enter a 6-digit code from your authenticator app each time you log in.</p>
-
-    <p>
-        <a href="/">Back to Dashboard</a>
-    </p>
-
-</body>
-</html>
+            <button onclick="window.location.href='/'">Back to Dashboard</button>
+        </div>
+    </div>

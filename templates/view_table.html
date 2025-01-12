@@ -1,143 +1,288 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Passwords</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Table</title>
     <style>
         body {
-            background: linear-gradient(to left, teal, #1E90FF);
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+	    margin-top: -100px;
+            flex-direction: column;
+            height: 100vh;
+            color: #ffffff;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 900px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #333;
         }
 
         table {
-            margin-left: auto;
-            margin-right: auto;
+            margin: 20px auto;
             text-align: center;
             border-collapse: collapse;
-            border: 2px solid black;
-            background-color: #E0E0E0; 
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         th, td {
-            border: 2px solid black;
-            padding: 8px;
+            border: 1px solid #ccc;
+            padding: 12px;
+            font-size: 1.1em;
+            color: #000;
         }
 
-        .center-button {
-            display: block;
-            margin: 0 auto;
+        th {
+            background-color: #0078d7;
+            color: #fff;
+        }
+
+        td {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .rounded-button {
+            display: inline-block;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 10px;
+            color: #ffffff;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .rounded-button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .rounded-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-button {
+            background-color: #ff4d4d;
+        }
+
+        .logout-button:hover {
+            background-color: #d43f3f;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+	    margin-top: -100px;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            padding: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .dialog label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .dialog input {
+            font-size: 1em;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dialog button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background-color: #0078d7;
+            color: white;
+        }
+
+        .dialog button:hover {
+            background-color: #005bb5;
+        }
+
+        .dialog button.cancel-button {
+            background-color: #d9534f;
+        }
+
+        .dialog button.cancel-button:hover {
+            background-color: #c9302c;
         }
     </style>
     <script>
-    const MASTER_PASSWORD = "{{ master_account_password }}"; // Passed from backend
+        const MASTER_PASSWORD = "{{ master_account_password }}"; // Passed from backend
 
-    function toggleIndividualPassword(toggleSwitch, passwordCell) {
-        const cell = document.getElementById(passwordCell);
-        const password = cell.dataset.password;
+        function toggleIndividualPassword(toggleSwitch, passwordCell) {
+            const cell = document.getElementById(passwordCell);
+            const password = cell.dataset.password;
 
-        if (toggleSwitch.checked) {
-            // Create a dialog box with a password field
-            const dialog = document.createElement('div');
-            dialog.style.position = 'fixed';
-            dialog.style.left = '50%';
-            dialog.style.top = '50%';
-            dialog.style.transform = 'translate(-50%, -50%)';
-            dialog.style.background = '#fff';
-            dialog.style.border = '1px solid #ccc';
-            dialog.style.padding = '20px';
-            dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-            dialog.style.zIndex = '1000';
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            overlay.style.display = 'block';
 
-            const label = document.createElement('label');
-            label.textContent = "Enter the master password:";
-            label.style.display = 'block';
-            label.style.marginBottom = '10px';
+            if (toggleSwitch.checked) {
+                const dialog = document.createElement('div');
+                dialog.className = 'dialog';
 
-            const input = document.createElement('input');
-            input.type = 'password';
-            input.style.width = '100%';
-            input.style.marginBottom = '10px';
+                const label = document.createElement('label');
+                label.textContent = "Enter the master password to unlock:";
 
-            const submitBtn = document.createElement('button');
-            submitBtn.textContent = 'Submit';
-            submitBtn.style.marginRight = '10px';
+                const input = document.createElement('input');
+                input.type = 'password';
 
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancel';
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'button-container';
 
-            // Append elements to the dialog
-            dialog.appendChild(label);
-            dialog.appendChild(input);
-            dialog.appendChild(submitBtn);
-            dialog.appendChild(cancelBtn);
-            document.body.appendChild(dialog);
+                const submitBtn = document.createElement('button');
+                submitBtn.textContent = 'Submit';
 
-            // Focus on the password input field
-            input.focus();
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.className = 'cancel-button';
 
-            submitBtn.onclick = function () {
-                if (input.value === MASTER_PASSWORD) {
-                    cell.textContent = password;
-                } else {
-                    alert("Incorrect master password!");
-                    toggleSwitch.checked = false; // Reset the switch if the password is incorrect
-                }
-                document.body.removeChild(dialog);
-            };
+                submitBtn.addEventListener('click', () => {
+                    if (input.value === MASTER_PASSWORD) {
+                        cell.textContent = password;
+                    } else {
+                        alert("Incorrect password");
+                        toggleSwitch.checked = false;
+                    }
+                    document.body.removeChild(dialog);
+                    document.body.removeChild(overlay);
+                });
 
-            cancelBtn.onclick = function () {
-                toggleSwitch.checked = false;
-                document.body.removeChild(dialog);
-            };
-        } else {
-            cell.textContent = '*****'; // Hide the password
+                cancelBtn.addEventListener('click', () => {
+                    toggleSwitch.checked = false;
+                    document.body.removeChild(dialog);
+                    document.body.removeChild(overlay);
+                });
+
+                buttonContainer.appendChild(cancelBtn);
+                buttonContainer.appendChild(submitBtn);
+
+                dialog.appendChild(label);
+                dialog.appendChild(input);
+                dialog.appendChild(buttonContainer);
+                document.body.appendChild(overlay);
+                document.body.appendChild(dialog);
+            } else {
+                cell.textContent = '*';
+            }
         }
-    }
-</script>
-
+    </script>
 </head>
-
 <body>
-    <h1><center>Password Table</center></h1>
-
-    <table>
-        <tr>
-            <th>Site Name</th>
-            <th>Email</th>
-            <th>Account Name</th>
-            <th>Password</th>
-            <th>Details</th>
-            <th>Toggle</th>
-        </tr>
-        {% for row in table_data %}
-        <tr>
-            <td>{{ row[0] }}</td> <!-- Site Name -->
-            <td>{{ row[1] }}</td> <!-- Email -->
-            <td>{{ row[2] }}</td> <!-- Account Name -->
-            <td id="password-{{ loop.index }}" class="password-cell" data-password="{{ row[3] }}">*****</td> <!-- Password -->
-            <td>{{ row[4] }}</td> <!-- Details -->
-            <td>
-                <label>
-                    <input type="checkbox" 
-                           onchange="toggleIndividualPassword(this, 'password-{{ loop.index }}')">
-                    Show
-                </label>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <br>
-    <form action="/add_entry">
-        <button class="center-button" type="submit">Add Entry</button>
-    </form>
-    <br>
-    <form action="/modify_entry">
-        <button class="center-button" type="submit">Modify Entry</button>
-    </form>
-    <br>
-    <form action="/delete_entry">
-        <button class="center-button" type="submit">Delete Entry</button>
-    </form>
-    <br>
-    <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
+    <div class="container">
+        <button class="rounded-button home-button" onclick="window.location.href = '/homepage';">Home</button>
+        <h1>Password Table</h1>
+        <table>
+            <tr>
+                <th>Site Name</th>
+                <th>Email</th>
+                <th>Account Name</th>
+                <th>Password</th>
+                <th>Details</th>
+                <th>Toggle</th>
+            </tr>
+            {% for row in table_data %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td id="password-{{ loop.index }}" data-password="{{ row[3] }}">*</td>
+                <td>{{ row[4] }}</td>
+                <td>
+                    <label>
+                        <input type="checkbox" onchange="toggleIndividualPassword(this, 'password-{{ loop.index }}')">
+                        Show
+                    </label>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div class="button-group">
+            <form action="/add_entry">
+                <button class="rounded-button">Add Entry</button>
+            </form>
+            <form action="/modify_entry">
+                <button class="rounded-button">Modify Entry</button>
+            </form>
+            <form action="/delete_entry">
+                <button class="rounded-button logout-button">Delete Entry</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

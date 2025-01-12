@@ -6,131 +6,191 @@
     <title>Modify Entry</title>
     <style>
         body {
-            background: linear-gradient(to left, teal, #1E90FF);
-            font-family: Arial, sans-serif;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            color: #333;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        form label, form input, form select, form button {
-            display: block;
-            margin: 10px auto;
-            width: 90%;
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: calc(80% - 300px);
+            max-width: 900px;
+            padding: 50px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.7em;
+            margin-bottom: -10px;
+            color: #333;
+            text-align: center;
+            width: 100%;
+        }
+
+        .center-button {
+            margin-bottom: 40px;
+            align-self: center; /* Center the button horizontally */
+        }
+
+        .home-button {
+            align-self: flex-start; /* Align the button to the left */
+            margin-bottom: -20px;
+            font-size: 1em;
+            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .home-button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        form label {
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        form input, form select {
+            font-size: 1em;
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        form input:disabled, form select:disabled {
+            background-color: #f2f2f2;
         }
 
         form input[type="submit"], .center-button {
-            background-color: teal;
-            color: #fff;
+            font-size: 1em;
+            padding: 12px 24px;
+            color: #ffffff;
+            background-color: #0078d7;
             border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-top: 40px; /* Added top margin for Modify Entry button */
         }
 
         form input[type="submit"]:hover, .center-button:hover {
-            background-color: #008080;
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
         }
 
-        select:disabled, input:disabled {
-            background-color: #ccc;
+        form input[type="submit"]:active, .center-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            width: 400px;
+            text-align: left;
+            color: #333;
+        }
+
+        .dialog input {
+            width: calc(100% - 20px);
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1em;
+        }
+
+        .dialog button {
+            font-size: 1em;
+            padding: 12px 24px;
+            color: #ffffff;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .dialog button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dialog .cancel {
+            background-color: #ff4d4d;
+        }
+
+        .dialog .cancel:hover {
+            background-color: #d43f3f;
+        }
+
+        .dialog .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
-    <script>
-		let originalOptions = []; // Array to store original dropdown options
-
-		function enableFields() {
-			// Create a dialog box with a password field
-			const dialog = document.createElement('div');
-			dialog.style.position = 'fixed';
-			dialog.style.left = '50%';
-			dialog.style.top = '50%';
-			dialog.style.transform = 'translate(-50%, -50%)';
-			dialog.style.background = '#fff';
-			dialog.style.border = '1px solid #ccc';
-			dialog.style.padding = '20px';
-			dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-			dialog.style.zIndex = '1000';
-
-			const label = document.createElement('label');
-			label.textContent = "Enter the master password to enable this form:";
-			label.style.display = 'block';
-			label.style.marginBottom = '10px';
-
-			const input = document.createElement('input');
-			input.type = 'password';
-			input.style.width = '100%';
-			input.style.marginBottom = '10px';
-
-			const submitBtn = document.createElement('button');
-			submitBtn.textContent = "Submit";
-			submitBtn.style.marginRight = '10px';
-
-			const cancelBtn = document.createElement('button');
-			cancelBtn.textContent = "Cancel";
-
-			// Add event listeners
-			submitBtn.addEventListener('click', () => {
-				const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
-				if (input.value === masterPassword) {
-					// Replace masked options with original options
-					const dropdown = document.getElementById("id_account");
-					dropdown.querySelectorAll("option").forEach((option, index) => {
-						option.textContent = originalOptions[index];
-					});
-
-					// Enable all form fields
-					dropdown.disabled = false;
-					document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
-					alert("Form unlocked!");
-					document.body.removeChild(dialog);
-				} else {
-					alert("Incorrect password!");
-					input.value = ''; // Clear the password field
-				}
-			});
-
-			cancelBtn.addEventListener('click', () => {
-				document.body.removeChild(dialog);
-			});
-
-			// Append elements to the dialog
-			dialog.appendChild(label);
-			dialog.appendChild(input);
-			dialog.appendChild(submitBtn);
-			dialog.appendChild(cancelBtn);
-
-			// Append dialog to the body
-			document.body.appendChild(dialog);
-		}
-
-		window.onload = function () {
-			const dropdown = document.getElementById("id_account");
-			// Store original options and mask them
-			dropdown.querySelectorAll("option").forEach(option => {
-				originalOptions.push(option.textContent);
-				option.textContent = "ACCESSED LOCKED TILL THE PASSWORD IS INPUTTED"; // Mask the options
-			});
-		};
-	</script>
 </head>
 <body>
+    <div class="dark-overlay" id="dark-overlay"></div>
     <div class="container">
+        <button class="home-button" onclick="window.location.href = '/homepage';">Home</button>
         <h1>Modify Entry</h1>
         <button class="center-button" onclick="enableFields()">Unlock window</button>
         <form action="/modify_entry" method="POST">
             <label for="id_account">Select an account to modify:</label>
-            <select name="id_account" id="id_account" disabled>
+            <select name="id_account" id="id_account">
                 {% for row in table_data %}
-                    <option value="{{ row[0] }}">
-                        Site: {{ row[1] }}, Email: {{ row[2] }}, Account name: {{ row[3] }}, Password: {{ row[4] }}, Details: {{ row[5] }}
-                    </option>
+			<option value="{{ row[5] }}">
+                        	Site: {{ row[0] }}, Email: {{ row[1] }}, Account name: {{ row[2] }}, Password: {{ row[3] }}, Details: {{ row[4] }}, ID: {{ row[5] }}
+			</option>
                 {% endfor %}
             </select>
             <label for="site_name">Site Name:</label>
@@ -145,7 +205,78 @@
             <input type="text" id="details" name="details" disabled>
             <input type="submit" value="Modify Entry" disabled>
         </form>
-        <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
     </div>
+
+    <script>
+        let originalOptions = [];
+
+        function enableFields() {
+            const darkOverlay = document.getElementById('dark-overlay');
+            darkOverlay.style.display = 'block';
+
+            const dialog = document.createElement('div');
+            dialog.classList.add('dialog');
+
+            const label = document.createElement('label');
+            label.textContent = "Enter the master password to enable this form:";
+            label.style.display = 'block';
+            label.style.marginBottom = '10px';
+
+            const input = document.createElement('input');
+            input.type = 'password';
+
+            const submitBtn = document.createElement('button');
+            submitBtn.textContent = "Submit";
+            submitBtn.style.marginRight = '10px';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.classList.add('cancel');
+
+            submitBtn.addEventListener('click', () => {
+                const masterPassword = "{{ master_account_password }}";
+                if (input.value === masterPassword) {
+                    const dropdown = document.getElementById("id_account");
+                    dropdown.querySelectorAll("option").forEach((option, index) => {
+                        option.textContent = originalOptions[index];
+                    });
+
+                    dropdown.disabled = false;
+                    document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="submit"]').forEach(input => input.disabled = false);
+                    alert("Form unlocked!");
+                    document.body.removeChild(dialog);
+                    darkOverlay.style.display = 'none';
+                } else {
+                    alert("Incorrect password!");
+                    input.value = '';
+                }
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                document.body.removeChild(dialog);
+                darkOverlay.style.display = 'none';
+            });
+
+            const buttonGroup = document.createElement('div');
+            buttonGroup.classList.add('button-group');
+
+            buttonGroup.appendChild(cancelBtn);
+            buttonGroup.appendChild(submitBtn);
+
+            dialog.appendChild(label);
+            dialog.appendChild(input);
+            dialog.appendChild(buttonGroup);
+
+            document.body.appendChild(dialog);
+        }
+
+        window.onload = function () {
+            const dropdown = document.getElementById("id_account");
+            dropdown.querySelectorAll("option").forEach(option => {
+                originalOptions.push(option.textContent);
+                option.textContent = "LOCKED UNTIL PASSWORD PROVIDED";
+            });
+        };
+    </script>
 </body>
 </html>

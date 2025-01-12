@@ -5,33 +5,107 @@
     <title>Pass-Gen-Manage</title>
     <style>
         body {
-            background: linear-gradient(to left, #87CEEB, #1E90FF);
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: -40px;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
         }
-        
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
         .rounded-button {
-            border-radius: 20px; /* Adjust the value as needed to make the buttons more or less rounded */
+            display: inline-block;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 20px 10px;
+            color: #ffffff;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .rounded-button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .rounded-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-button {
+            background-color: #ff4d4d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-button:hover {
+            background-color: #e60000;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .new-pass-button {
+            background-color: #41cb52;
+        }
+
+        .new-pass-button:hover {
+            background-color: #008000;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #333;
+            opacity: 0.8;
         }
     </style>
 </head>
-{% extends 'base.html' %}
-
 <body>
-{% block content %}
-    <h1><b>{% block title %} Welcome to Pass-Gen-Manage {% endblock %}</b></h1>
-    <br>
-    <form action="/view_table">
-        <button type="submit" class="rounded-button">Show passwords</button>
-    </form>
-    <br>
-    <form action="/add_entry">
-        <button type="submit" class="rounded-button">Add a new entry</button>
-    </form>
-    <br>
-    <form action="/pw_gen">
-        <button type="submit" class="rounded-button">Generate a new password</button>
-    </form>
-    <br>
-	<button class="rounded-button" onclick="window.location.href = '/';">Log out</button>
-{% endblock %}
+    <div class="container">
+        <h1 style="word-wrap: break-word; max-width: 100%; line-height: 1.5;"><b>Welcome to <br> Password Keeper Manager</b></h1>
+        <form action="/view_table">
+            <button type="submit" class="rounded-button">Show Passwords</button>
+        </form>
+        <form action="/add_entry">
+            <button type="submit" class="rounded-button">Add a New Entry</button>
+        </form>
+        <form action="/pw_gen">
+            <button type="submit" class="rounded-button new-pass-button">Generate a New Password</button>
+        </form>
+        <button class="rounded-button logout-button" onclick="window.location.href = '/';">Log Out</button>
+    </div>
+    <footer>
+        <p>Password Keeper © 2025</p>
+    </footer>
 </body>
 </html>

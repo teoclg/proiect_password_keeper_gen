@@ -6,61 +6,134 @@
     <title>New Entry</title>
     <style>
         body {
-            background: linear-gradient(to left, teal, #1E90FF);
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+	    margin-top: -40px;
+            flex-direction: column;
+            height: 100vh;
+            color: #ffffff;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
-        h1 {
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: calc(80% - 300px);
+            max-width: 900px;
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 40px;
+            margin-top: -30px;
             color: #333;
         }
+
         form {
-            text-align: center;
-            margin-top: 20px;
+            width: 100%;
         }
-        .input-group {
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
             margin-bottom: 20px;
+        }
+
+        .form-row .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #333;
             text-align: left;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+
         input[type="text"],
         input[type="email"],
         input[type="password"] {
-            width: 100%;
+            font-size: 1em;
             padding: 10px;
+            width: 100%;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .submit-button {
-            text-align: center;
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #0078d7;
+            box-shadow: 0 0 8px rgba(0, 120, 215, 0.5);
         }
-        .center-button {
-            display: block;
-            margin: 0 auto;
+
+        .form-row.adjacent {
+            gap: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .rounded-button {
+            display: inline-block;
+            font-size: 1.2em;
             padding: 10px 20px;
-            background-color: teal;
-            color: #fff;
+            margin: 10px 0;
+            color: #ffffff;
+            background-color: #0078d7;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease-in-out;
         }
-        .center-button:hover {
-            background-color: #008080;
+
+        .rounded-button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .rounded-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-button {
+            background-color: #ff4d4d;
+        }
+
+        .logout-button:hover {
+            background-color: #d43f3f;
+        }
+
+        .new-pass-button {
+            background-color: #41cb52;
+        }
+
+        .new-pass-button:hover {
+            background-color: #36a944;
         }
     </style>
 </head>
@@ -68,37 +141,37 @@
     <div class="container">
         <h1>New Entry</h1>
         <form action="/add_entry" method="POST">
-            <div class="input-group">
-                <label for="site_name">Site Name:</label>
-                <input type="text" id="site_name" name="site_name" required>
+            <div class="form-row adjacent">
+                <div class="input-group">
+                    <label for="site_name">Site Name:</label>
+                    <input type="text" id="site_name" name="site_name" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
             </div>
-
-            <div class="input-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+            <div class="form-row adjacent">
+                <div class="input-group">
+                    <label for="account_name">Account Name:</label>
+                    <input type="text" id="account_name" name="account_name" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
             </div>
-
-            <div class="input-group">
-                <label for="account_name">Account Name:</label>
-                <input type="text" id="account_name" name="account_name" required>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="details">Details:</label>
+                    <input type="text" id="details" name="details" required>
+                </div>
             </div>
-
-            <div class="input-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-			
-			<div class="input-group">
-                <label for="email">Details:</label>
-                <input type="text" id="details" name="details" required>
-            </div>
-
-            <div class="submit-button">
-                <input type="submit" value="Submit" class="center-button">
+            <div class="button-group">
+                <button class="rounded-button logout-button" type="button" onclick="window.location.href = '/homepage';">Home</button>
+                <button class="rounded-button new-pass-button" type="submit">Submit</button>
             </div>
         </form>
-        <br>
-        <button class="center-button" onclick="window.location.href = '/homepage';">Home</button>
     </div>
 </body>
 </html>

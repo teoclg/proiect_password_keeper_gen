@@ -189,9 +189,7 @@ def get_master_password(ID_master_account):
 def show_table_for_modify_entry(ID_master_account):
     # Establish a connection to MySQL
     connection, cursor = set_connection_cursor()
-    
     master_account_password = session.get('master_account_password')
-    
     # Execute the query with the parameter as a tuple
     query = """
     SELECT ID_account, site_name, email, account_name, password, details
@@ -199,22 +197,20 @@ def show_table_for_modify_entry(ID_master_account):
     WHERE ID_master_account = %s
     """
     cursor.execute(query, (ID_master_account,))  # Note the comma to make it a tuple
-    
     rows = cursor.fetchall()
     result = []
     for row in rows:
         try:
             decrypted_password = decrypt_password(master_account_password, row[4])
             print(decrypted_password)
-            result.append((row[1], row[2], row[3], decrypted_password, row[5]))
+            result.append((row[1], row[2], row[3], decrypted_password, row[5], row[0]))
         except Exception as e:
             print(f"Eroare la decriptarea parolei pentru site-ul {row[0]}: {e}")
-            result.append((row[1], row[2], row[3], "EROARE", row[5]))
-
+            result.append((row[1], row[2], row[3], "EROARE", row[5], row[0]))
+ 
     # Close cursor and connection
     cursor.close()
     connection.close()
-    
     return result
 
 def insert_into_table(site_name, email, account_name, password, details, ID_master_account):
@@ -629,10 +625,9 @@ def modify_entry():
     ID_master_account = session.get('ID_master_account')
     if not ID_master_account:
         return redirect(url_for('login'))
-    
     # Use the show_table function to fetch accounts
     data = show_table_for_modify_entry(ID_master_account)
-
+ 
     # Fetch the master password
     connection, cursor = set_connection_cursor()
     query = "SELECT master_account_password FROM account_table WHERE ID_master_account = %s"
@@ -640,12 +635,12 @@ def modify_entry():
     result = cursor.fetchone()
     cursor.close()
     connection.close()
-
+ 
     if not result:
         return "Master account not found", 404
-
+ 
     master_account_password = session.get('master_account_password')  
-
+ 
     # Handle POST request
     if request.method == 'POST':
         id_account = int(request.form['id_account'])
@@ -658,7 +653,6 @@ def modify_entry():
         # Update the entry with the new values
         update_table_entry_by_id(id_account, site_name, email, account_name, encrypted_password, details)
         return redirect(url_for('homepage'))
-    
     # Return a response for the 'GET' method
     if verify_password(master_account_password, result[0]):
         return render_template('modify_entry.html', table_data=data, master_account_password=master_account_password)

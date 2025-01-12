@@ -5,7 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Account Dashboard</title>
     <style>
-        /* Simple styling for the modal pop-up */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -40px;
+            height: 100vh;
+            color: #ffffff;
+            padding: 20px;
+            overflow: hidden; /* Make the page unscrollable */
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 740px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        p, ul {
+            color: #666;
+            font-size: 1em; /* Adjusted font size for modal content */
+            margin-bottom: 20px;
+        }
+
+        ul {
+            text-align: left;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #5a89f2;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #476aba;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -19,13 +79,16 @@
             justify-content: center;
             align-items: center;
         }
+
         .modal-content {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             width: 80%;
             max-width: 600px;
+            overflow: hidden; /* Prevent scrolling inside modal */
         }
+
         .close {
             float: right;
             font-size: 1.5em;
@@ -35,66 +98,60 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to the Master Account Dashboard</h1>
+    <div class="container">
+        <h1 style="word-wrap: break-word; max-width: 100%; line-height: 1.5;">Welcome to the <br> Master Account Dashboard</h1>
 
-    <p>
-        <a href="/sign_up_master_account">Sign up Master Account</a>
-    </p>
+        <p><button style="width: 300px; white-space: nowrap;" onclick="window.location.href='/sign_up_master_account'">Sign up Master Account</button></p>
+        
+        <p><button style="width: 300px; white-space: nowrap;" onclick="window.location.href='/login'">Log in to Master Account</button></p>
+        
+        <p><button style="width: 300px; white-space: nowrap;" onclick="window.location.href='/change_password_master_account'">Change Password</button></p>
     
-    <p>
-        <a href="/login">Log in to Master Account</a>
-    </p>
-    
-    <p>
-        <a href="/change_password_master_account">Change Password for Master Account</a>
-    </p>
-	
-	<p>
-        <a href="/reset_password_master_account">Forgot your password? Click here to reset it.</a>
-    </p>
-    
-    <!-- GDPR Button -->
-    <p>
-        <button id="gdprButton">View GDPR Policy</button>
-    </p>
+        <p><button style="width: 300px; white-space: nowrap;" onclick="window.location.href='/reset_password_master_account'">Forgot Password?</button></p>
+        
+        <!-- GDPR Button -->
+        <div style="margin-top: 20px; width: 100%; display: flex; justify-content: center;">
+            <button id="gdprButton" style="padding: 10px 20px; font-size: 1em; width: 200px; background: #5a89f2; border: none; border-radius: 12px; color: #fff; transition: background 0.3s ease;" onmouseover="this.style.background='#476aba';" onmouseout="this.style.background='#91aef0';">View GDPR Policy</button>
+        </div>
+    </div>
 
     <!-- Modal Pop-Up -->
     <div id="gdprModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <h2>GDPR Privacy Policy</h2>
+           <span class="close" id="closeModal">&times;</span>
+            <h2 style="color: black; text-align: center;">GDPR Privacy Policy</h2>
             <p><strong>Effective Date:</strong> 10.01.2025</p>
             <p>
                 We are committed to protecting your data in compliance with the General Data Protection Regulation (GDPR).
                 This policy outlines how we collect, use, and safeguard your information.
             </p>
-            <h3>1. What We Collect</h3>
+            <h3 style="color: black;">1. What We Collect</h3>
             <ul>
                 <li><strong>Account Info:</strong> Name, email, and credentials.</li>
                 <li><strong>Encrypted Vault Data:</strong> Passwords and sensitive information (accessible only to you).</li>
                 <li><strong>Usage Data:</strong> Logins, IP addresses, and device details.</li>
             </ul>
-            <h3>2. Why We Collect It</h3>
+            <h3 style="color: black;">2. Why We Collect It</h3>
             <ul>
                 <li>To provide and secure our services.</li>
                 <li>To comply with legal requirements.</li>
                 <li>To improve service functionality (using anonymized data where possible).</li>
             </ul>
-            <h3>3. Your Rights</h3>
+            <h3 style="color: black;">3. Your Rights</h3>
             <p>
                 You have the right to access, correct, delete, restrict, or transfer your data. Contact us at 
                 <strong>password_keeper@gmail.com</strong> to exercise these rights.
             </p>
-            <h3>4. Data Security and Retention</h3>
+            <h3 style="color: black;">4. Data Security and Retention</h3>
             <ul>
                 <li>All vault data is encrypted with a key only you know.</li>
                 <li>Data is stored securely and retained only as long as necessary for our services or legal compliance.</li>
             </ul>
-            <h3>5. Data Sharing</h3>
+            <h3 style="color: black;">5. Data Sharing</h3>
             <p>
                 We do not sell your data. It may be shared with trusted providers or authorities only when required by law.
             </p>
-            <h3>6. Complaints</h3>
+            <h3 style="color: black;">6. Complaints</h3>
             <p>
                 For concerns, contact us or file a complaint with your local Data Protection Authority.
             </p>

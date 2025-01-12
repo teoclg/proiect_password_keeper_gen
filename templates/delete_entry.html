@@ -1,142 +1,280 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delete Entries</title>
     <style>
         body {
-            background: linear-gradient(to left, teal, #1E90FF);
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://img.freepik.com/premium-photo/blue-pink-mesh-gradient-banner-background-wallpaper-website-template-landing-page-web-frame-text_685444-38.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+	    margin-top: -60px;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            color: #000000;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: calc(80% - 300px);
+            max-width: 900px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
         }
 
         table {
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
+            width: 100%;
             border-collapse: collapse;
-            border: 2px solid black;
-            background-color: #E0E0E0;
+            margin-bottom: 20px;
         }
 
         th, td {
-            border: 2px solid black;
-            padding: 8px;
+            border: 2px solid #ccc;
+            padding: 10px;
+            text-align: center;
         }
 
-        .center-button {
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .rounded-button {
+            display: inline-block;
+            font-size: 1em;
+            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .rounded-button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .rounded-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .delete-button {
+            background-color: #ff4d4d;
+        }
+
+        .delete-button:hover {
+            background-color: #d43f3f;
+        }
+
+        .logout-button {
+            background-color: #0078d7;
+        }
+
+        .logout-button:hover {
+            background-color: #005bb5;
+        }
+
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+	    margin-top: -60px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            display: none;
+            width: 400px;
+        }
+
+        .dialog input {
+            width: calc(100% - 5px);
+            margin-bottom: 20px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .dialog .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog .button-group button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .dialog .button-group .cancel {
+            background-color: #ff4d4d;
+            margin-right: 10px;
+        }
+
+        .dialog .button-group .cancel:hover {
+            background-color: #d43f3f;
+        }
+
+        .dialog .button-group .submit {
+            background-color: #0078d7;
+        }
+
+        .dialog .button-group .submit:hover {
+            background-color: #005bb5;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
             display: block;
-            margin: 0 auto;
+        }
+
+        .dialog.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <h1><center>Delete Entries</center></h1>
-    <form action="/delete_entry" method="post">
-        <table>
-            <tr>
-                <th>Select</th>
-                <th>Site Name</th>
-                <th>Email</th>
-                <th>Account Name</th>
-                <th>Password</th>
-                <th>Details</th>
-            </tr>
-            {% for row in table_data %}
-            <tr>
-                <td>
-                    <input type="checkbox" name="delete_{{ loop.index0 }}" value="yes" id="delete_{{ loop.index0 }}" disabled>
-                    <button type="button" onclick="unlockCheckbox('{{ loop.index0 }}', '{{ row[3] }}')">Unlock</button>
-                </td>
-                <td>
-                    <input type="hidden" name="site_name_{{ loop.index0 }}" value="{{ row[0] }}">
-                    {{ row[0] }}
-                </td>
-                <td>
-                    <input type="hidden" name="email_{{ loop.index0 }}" value="{{ row[1] }}">
-                    {{ row[1] }}
-                </td>
-                <td>
-                    <input type="hidden" name="account_name_{{ loop.index0 }}" value="{{ row[2] }}">
-                    {{ row[2] }}
-                </td>
-                <td id="password_{{ loop.index0 }}">
-                    <input type="hidden" name="password_{{ loop.index0 }}" value="{{ row[3] }}">
-                    *****
-                </td>
-                <td>
-                    <input type="hidden" name="details_{{ loop.index0 }}" value="{{ row[4] }}">
-                    {{ row[4] }}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-        <br>
-        <input type="submit" class="center-button" value="Delete Selected">
-        <br><br>
-        <button type="button" class="center-button" onclick="goToHome()">Home</button>
-    </form>
+    <div class="container">
+        <h1>Delete Entries</h1>
+        <form action="/delete_entry" method="post">
+            <table>
+                <tr>
+                    <th>Select</th>
+                    <th>Site Name</th>
+                    <th>Email</th>
+                    <th>Account Name</th>
+                    <th>Password</th>
+                    <th>Details</th>
+                </tr>
+                {% for row in table_data %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="delete_{{ loop.index0 }}" value="yes" id="delete_{{ loop.index0 }}" disabled>
+                        <button type="button" class="rounded-button" onclick="unlockCheckbox('{{ loop.index0 }}', '{{ row[3] }}')">Unlock</button>
+                    </td>
+                    <td>
+                        <input type="hidden" name="site_name_{{ loop.index0 }}" value="{{ row[0] }}">
+                        {{ row[0] }}
+                    </td>
+                    <td>
+                        <input type="hidden" name="email_{{ loop.index0 }}" value="{{ row[1] }}">
+                        {{ row[1] }}
+                    </td>
+                    <td>
+                        <input type="hidden" name="account_name_{{ loop.index0 }}" value="{{ row[2] }}">
+                        {{ row[2] }}
+                    </td>
+                    <td id="password_{{ loop.index0 }}">
+                        <input type="hidden" name="password_{{ loop.index0 }}" value="{{ row[3] }}">
+                        ***
+                    </td>
+                    <td>
+                        <input type="hidden" name="details_{{ loop.index0 }}" value="{{ row[4] }}">
+                        {{ row[4] }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="button-group">
+                <button type="submit" class="rounded-button delete-button">Delete Selected</button>
+                <button type="button" class="rounded-button logout-button" onclick="goToHome()">Home</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="overlay" class="overlay"></div>
+
+    <div id="dialog" class="dialog">
+        <label>Enter the master password for this entry:</label>
+        <input type="password" id="dialog-input">
+        <div class="button-group">
+            <button id="dialog-cancel" class="cancel">Cancel</button>
+            <button id="dialog-submit" class="submit">Submit</button>
+        </div>
+    </div>
 
     <script>
-		function unlockCheckbox(index, actualPassword) {
-			// Create a dialog box with a password field
-			const dialog = document.createElement('div');
-			dialog.style.position = 'fixed';
-			dialog.style.left = '50%';
-			dialog.style.top = '50%';
-			dialog.style.transform = 'translate(-50%, -50%)';
-			dialog.style.background = '#fff';
-			dialog.style.border = '1px solid #ccc';
-			dialog.style.padding = '20px';
-			dialog.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-			dialog.style.zIndex = '1000';
+        function unlockCheckbox(index, actualPassword) {
+            const dialog = document.getElementById('dialog');
+            const overlay = document.getElementById('overlay');
+            const input = document.getElementById('dialog-input');
+            const submitBtn = document.getElementById('dialog-submit');
+            const cancelBtn = document.getElementById('dialog-cancel');
 
-			const label = document.createElement('label');
-			label.textContent = "Enter the master password for this entry:";
-			label.style.display = 'block';
-			label.style.marginBottom = '10px';
+            dialog.classList.add('active');
+            overlay.classList.add('active');
 
-			const input = document.createElement('input');
-			input.type = 'password';
-			input.style.width = '100%';
-			input.style.marginBottom = '10px';
+            submitBtn.onclick = function() {
+                const masterPassword = "{{ master_account_password }}";
+                if (input.value === masterPassword) {
+                    document.getElementById(`delete_${index}`).disabled = false;
+                    document.getElementById(`password_${index}`).innerText = actualPassword;
+                    alert("Checkbox unlocked! You can select this entry for deletion.");
+                    dialog.classList.remove('active');
+                    overlay.classList.remove('active');
+                    input.value = '';
+                } else {
+                    alert("Incorrect password! Unable to unlock this checkbox.");
+                    input.value = '';
+                }
+            };
 
-			const submitBtn = document.createElement('button');
-			submitBtn.textContent = "Submit";
-			submitBtn.style.marginRight = '10px';
+            cancelBtn.onclick = function() {
+                dialog.classList.remove('active');
+                overlay.classList.remove('active');
+                input.value = '';
+            };
+        }
 
-			const cancelBtn = document.createElement('button');
-			cancelBtn.textContent = "Cancel";
-
-			// Add event listeners
-			submitBtn.addEventListener('click', () => {
-				const masterPassword = "{{ master_account_password }}"; // Retrieved from backend
-				if (input.value === masterPassword) {
-					document.getElementById(`delete_${index}`).disabled = false;
-					document.getElementById(`password_${index}`).innerText = actualPassword;
-					alert("Checkbox unlocked! You can select this entry for deletion.");
-					document.body.removeChild(dialog);
-				} else {
-					alert("Incorrect password! Unable to unlock this checkbox.");
-					input.value = ''; // Clear the password field
-				}
-			});
-
-			cancelBtn.addEventListener('click', () => {
-				document.body.removeChild(dialog);
-			});
-
-			// Append elements to the dialog
-			dialog.appendChild(label);
-			dialog.appendChild(input);
-			dialog.appendChild(submitBtn);
-			dialog.appendChild(cancelBtn);
-
-			// Append dialog to the body
-			document.body.appendChild(dialog);
-		}
-
-		function goToHome() {
-			window.location.href = '/homepage';
-		}
-</script>
-
+        function goToHome() {
+            window.location.href = '/homepage';
+        }
+    </script>
 </body>
 </html>
