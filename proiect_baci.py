@@ -136,7 +136,7 @@ def set_connection_cursor():
     connection  = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="parolacont1.",
+        password="",
         database="password_management"
     )
     # Create a cursor object to execute SQL queries
